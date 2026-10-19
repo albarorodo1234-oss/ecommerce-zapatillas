@@ -5,7 +5,7 @@ Diseño preliminar de un sitio web e-commerce de zapatillas importadas para la m
 
 **Materia:** Programación Web  
 **Proyecto:** E-Commerce de Zapatillas Importadas  
-**Repositorio Público:** [PEGAR_AQUÍ_EL_ENLACE_DEL_REPOSITORIO]
+**Repositorio Público:** https://github.com/albarorodo1234-oss/ecommerce-zapatillas.git
 
 ---
 
