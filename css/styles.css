@@ -994,3 +994,67 @@ h4 {
     top: 90px;
   }
 }
+
+
+/* ---------- 15. Vistas de acceso (login y registro) ---------- */
+.auth-main {
+  background: var(--fondo-suave);
+  padding-block: 3.5rem;
+}
+
+.auth-card {
+  max-width: 440px;
+  height: auto;
+  margin-inline: auto;
+  padding: 2rem;
+}
+
+.auth-title {
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.form-control {
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+}
+
+.form-control:focus {
+  border-color: var(--naranja);
+  box-shadow: 0 0 0 0.25rem rgba(255, 77, 0, 0.2);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.25rem 0;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--borde);
+}
+
+.auth-switch {
+  margin: 1.5rem 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.auth-switch a {
+  color: var(--texto);
+  font-weight: 700;
+}
