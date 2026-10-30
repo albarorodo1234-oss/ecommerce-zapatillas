@@ -787,3 +787,39 @@ h4 {
     animation: none !important;
   }
 }
+
+/* ---------- 13. Ajustes y vista Catálogo ---------- */
+
+/* Opiniones: el nombre siempre queda abajo, alineado */
+.review {
+  display: flex;
+  flex-direction: column;
+}
+
+.review figcaption {
+  margin-top: auto;
+}
+
+/* Catálogo */
+.breadcrumb a {
+  color: var(--naranja-texto);
+}
+
+.page-title {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  margin-bottom: 0.25rem;
+}
+
+.results-count {
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+/* Los filtros te acompañan al bajar (solo en pantallas grandes) */
+@media (min-width: 992px) {
+  .filters-sticky {
+    position: sticky;
+    top: 90px;
+    height: auto;
+  }
+}
