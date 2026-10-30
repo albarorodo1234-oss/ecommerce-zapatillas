@@ -1079,3 +1079,42 @@ h4 {
   color: var(--naranja-texto);
   font-weight: 600;
 }
+
+/* ---------- 17. Vista Guía de tallas ---------- */
+.size-card {
+  height: auto;
+  padding: 2rem;
+}
+
+.size-table {
+  margin: 0;
+}
+
+.size-table th {
+  padding: 0.9rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--texto);
+  border-bottom: 1px solid var(--borde);
+}
+
+.size-table td {
+  padding: 0.9rem 0.75rem;
+  color: var(--texto-suave);
+  border-bottom: 1px solid var(--borde);
+}
+
+.size-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.size-table tbody tr:hover td {
+  background: var(--fondo-suave);
+}
+
+.size-note {
+  margin: 1.25rem 0 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
