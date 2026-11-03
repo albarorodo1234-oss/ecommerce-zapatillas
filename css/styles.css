@@ -1256,3 +1256,99 @@ h4 {
 .contact-list a {
   text-decoration: underline;
 }
+
+/* ---------- 20. Vista Nosotros ---------- */
+.about-hero {
+  padding-block: 3.5rem;
+}
+
+.about-hero img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+.about-hero .page-title {
+  margin-bottom: 1rem;
+}
+
+.about-lead {
+  color: var(--texto-suave);
+  font-size: 1.05rem;
+}
+
+.value-card {
+  padding: 1.5rem;
+}
+
+.value-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  background: var(--naranja-suave);
+  color: var(--naranja-texto);
+  font-size: 1.4rem;
+}
+
+.value-card h3 {
+  font-size: 1.1rem;
+}
+
+.value-card p {
+  margin: 0;
+  color: var(--texto-suave);
+}
+
+/* Lista numerada con círculos naranjas */
+.steps {
+  display: grid;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: paso;
+}
+
+.steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  counter-increment: paso;
+}
+
+.steps li::before {
+  content: counter(paso);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--naranja-boton);
+  color: #fff;
+  font-weight: 700;
+}
+
+.steps h3 {
+  font-size: 1.05rem;
+  margin-bottom: 0.15rem;
+}
+
+.steps p {
+  margin: 0;
+  color: var(--texto-suave);
+}
+
+@media (min-width: 768px) {
+  .steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .steps li {
+    flex-direction: column;
+  }
+}
