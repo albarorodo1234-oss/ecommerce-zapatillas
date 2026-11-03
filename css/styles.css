@@ -1204,3 +1204,55 @@ h4 {
   font-weight: 700;
   white-space: nowrap;
 }
+
+
+/* ---------- 19. Vista Contacto ---------- */
+.contact-card {
+  height: auto;
+  padding: 1.5rem;
+}
+
+.contact-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.contact-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+.contact-list li:last-child {
+  border-bottom: 0;
+}
+
+.contact-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--naranja-suave);
+  color: var(--naranja-texto);
+  font-size: 1.1rem;
+}
+
+.contact-list strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.contact-list a,
+.contact-list span:not(.contact-icon) {
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.contact-list a {
+  text-decoration: underline;
+}
