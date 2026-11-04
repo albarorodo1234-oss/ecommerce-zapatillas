@@ -1,4 +1,5 @@
 # ecommerce-zapatillas
+
 Diseño preliminar de un sitio web e-commerce de zapatillas importadas para la materia Programación Web
 
 # Entrega de Proyecto - TP N.º 3: Mockup UI/UX en Figma
@@ -20,9 +21,11 @@ Diseño preliminar de un sitio web e-commerce de zapatillas importadas para la m
 Las capturas exportadas en formato PNG, correspondientes a las 12 secciones o páginas del sitio web, se encuentran subidas directamente a este repositorio.
 
 ### 1. Pagina Principal
+
 ![Figma](Figma-1.png)
 
-### 2. Login de clientes 
+### 2. Login de clientes
+
 ![Figma2](Figma-2.png)
 
 ### 📋 Resumen de Secciones Incluidas

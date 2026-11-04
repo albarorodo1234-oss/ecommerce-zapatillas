@@ -1,0 +1,27 @@
+{
+  "name": "ecomerce-zapatillas",
+  "version": "1.0.0",
+  "description": "Diseño preliminar de un sitio web e-commerce de zapatillas importadas para la materia Programación Web",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/albarorodo1234-oss/ecommerce-zapatillas.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/albarorodo1234-oss/ecommerce-zapatillas/issues"
+  },
+  "homepage": "https://github.com/albarorodo1234-oss/ecommerce-zapatillas#readme",
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

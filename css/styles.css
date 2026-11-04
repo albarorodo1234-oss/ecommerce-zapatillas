@@ -995,7 +995,6 @@ h4 {
   }
 }
 
-
 /* ---------- 15. Vistas de acceso (login y registro) ---------- */
 .auth-main {
   background: var(--fondo-suave);
@@ -1204,7 +1203,6 @@ h4 {
   font-weight: 700;
   white-space: nowrap;
 }
-
 
 /* ---------- 19. Vista Contacto ---------- */
 .contact-card {
