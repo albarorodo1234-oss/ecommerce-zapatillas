@@ -1,0 +1,1 @@
+// Aquí irá el JavaScript del sitio (carrito, filtros, etc.)
