@@ -4,10 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Contacto | SoleMate</title>
+    <!-- Titulo y descripcion -->
+    <title>Crear cuenta | SoleMate</title>
     <meta
       name="description"
-      content="Escribinos por consultas sobre pedidos, tallas, cambios o envíos. Atención por formulario, WhatsApp y correo electrónico."
+      content="Creá tu cuenta en SoleMate y comprá zapatillas importadas de Chile y Bolivia con envío rápido y cuotas sin interés."
     />
 
     <meta name="theme-color" content="#d43f00" />
@@ -44,12 +45,12 @@
     <!-- ========== HEADER ========== -->
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="index.html">
+        <a class="brand" href="index.php">
           <span class="brand-mark" aria-hidden="true"><i class="bi bi-x-circle"></i></span>
           SOLEMATE
         </a>
 
-        <form class="search" role="search" action="catalogo.html">
+        <form class="search" role="search" action="catalogo.php">
           <label class="visually-hidden" for="buscar">Buscar zapatillas importadas</label>
           <i class="bi bi-search" aria-hidden="true"></i>
           <input
@@ -62,10 +63,10 @@
         </form>
 
         <nav class="header-actions" aria-label="Cuenta y carrito">
-          <a class="icon-link" href="login.html" aria-label="Iniciar sesión">
+          <a class="icon-link" href="login.php" aria-label="Iniciar sesión">
             <i class="bi bi-person" aria-hidden="true"></i>
           </a>
-          <a class="icon-link" href="carrito.html" aria-label="Carrito, 2 productos">
+          <a class="icon-link" href="carrito.php" aria-label="Carrito, 2 productos">
             <i class="bi bi-cart2" aria-hidden="true"></i>
             <span class="cart-count" aria-hidden="true">2</span>
           </a>
@@ -75,116 +76,87 @@
     </header>
 
     <!-- ========== MAIN ========== -->
-    <main id="contenido">
-      <div class="container section-padding pt-4">
-        <nav aria-label="Ruta de navegación">
-          <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="index.html">Inicio</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Contacto</li>
-          </ol>
-        </nav>
 
-        <h1 class="page-title">Contacto</h1>
-        <p class="results-count mb-4">
-          ¿Tenés dudas sobre un pedido, una talla o un envío? Escribinos y te respondemos a la
-          brevedad.
-        </p>
+    <main id="contenido" class="auth-main">
+      <div class="container">
+        <section class="tarjeta auth-card" aria-labelledby="registro-titulo">
+          <h1 id="registro-titulo" class="auth-title">Crear Cuenta</h1>
 
-        <div class="row g-4">
-          <!-- Formulario -->
-          <section class="col-lg-7" aria-labelledby="mensaje-titulo">
-            <div class="tarjeta contact-card">
-              <h2 id="mensaje-titulo" class="checkout-title">Envianos un mensaje</h2>
-              <form>
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label class="form-label" for="nombre">Nombre</label>
-                    <input
-                      class="form-control"
-                      type="text"
-                      id="nombre"
-                      name="nombre"
-                      autocomplete="name"
-                      required
-                    />
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label" for="email">Correo electrónico</label>
-                    <input
-                      class="form-control"
-                      type="email"
-                      id="email"
-                      name="email"
-                      placeholder="tu@email.com"
-                      autocomplete="email"
-                      required
-                    />
-                  </div>
-                  <div class="col-12">
-                    <label class="form-label" for="asunto">Asunto</label>
-                    <select class="form-select" id="asunto" name="asunto" required>
-                      <option value="" selected disabled>Elegí una opción</option>
-                      <option>Consulta sobre un pedido</option>
-                      <option>Cambios y devoluciones</option>
-                      <option>Ayuda con las tallas</option>
-                      <option>Otro motivo</option>
-                    </select>
-                  </div>
-                  <div class="col-12">
-                    <label class="form-label" for="mensaje">Mensaje</label>
-                    <textarea
-                      class="form-control"
-                      id="mensaje"
-                      name="mensaje"
-                      rows="5"
-                      required
-                    ></textarea>
-                  </div>
-                  <div class="col-12">
-                    <!-- Pasará a type="submit" cuando el formulario se conecte con JavaScript o un servidor -->
-                    <button type="button" class="btn btn-acento btn-lg">Enviar mensaje</button>
-                  </div>
-                </div>
-              </form>
+          <form>
+            <div class="mb-3">
+              <label class="form-label" for="nombre">Nombre completo</label>
+              <input
+                class="form-control"
+                type="text"
+                id="nombre"
+                name="nombre"
+                placeholder="Tu nombre y apellido"
+                autocomplete="name"
+                required
+              />
             </div>
-          </section>
 
-          <!-- Otras vías de contacto -->
-          <aside class="col-lg-5" aria-labelledby="vias-titulo">
-            <div class="tarjeta contact-card">
-              <h2 id="vias-titulo" class="checkout-title">Otras vías de contacto</h2>
-              <ul class="contact-list">
-                <li>
-                  <span class="contact-icon" aria-hidden="true"
-                    ><i class="bi bi-whatsapp"></i
-                  ></span>
-                  <div>
-                    <strong>WhatsApp</strong>
-                    <a href="https://wa.me/56912345678" target="_blank" rel="noopener noreferrer"
-                      >+56 9 1234 5678</a
-                    >
-                  </div>
-                </li>
-                <li>
-                  <span class="contact-icon" aria-hidden="true"
-                    ><i class="bi bi-envelope"></i
-                  ></span>
-                  <div>
-                    <strong>Correo electrónico</strong>
-                    <a href="mailto:hola@solemate.com">hola@solemate.com</a>
-                  </div>
-                </li>
-                <li>
-                  <span class="contact-icon" aria-hidden="true"><i class="bi bi-clock"></i></span>
-                  <div>
-                    <strong>Horario de atención</strong>
-                    <span>Lunes a viernes, de 9 a 18 h</span>
-                  </div>
-                </li>
-              </ul>
+            <div class="mb-3">
+              <label class="form-label" for="email">Correo Electrónico</label>
+              <input
+                class="form-control"
+                type="email"
+                id="email"
+                name="email"
+                placeholder="tu@email.com"
+                autocomplete="email"
+                required
+              />
             </div>
-          </aside>
-        </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="password">Contraseña</label>
+              <input
+                class="form-control"
+                type="password"
+                id="password"
+                name="password"
+                autocomplete="new-password"
+                minlength="8"
+                aria-describedby="ayuda-password"
+                required
+              />
+              <div id="ayuda-password" class="form-text">Mínimo 8 caracteres.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="password2">Repetir contraseña</label>
+              <input
+                class="form-control"
+                type="password"
+                id="password2"
+                name="password2"
+                autocomplete="new-password"
+                minlength="8"
+                required
+              />
+            </div>
+
+            <div class="form-check mb-4">
+              <input class="form-check-input" type="checkbox" id="terminos" required />
+              <label class="form-check-label" for="terminos">
+                Acepto los <a href="#">Términos de Servicio</a> y la
+                <a href="#">Política de Privacidad</a>
+              </label>
+            </div>
+
+            <!-- Pasará a type="submit" cuando el formulario se conecte con JavaScript o un servidor -->
+            <button type="button" class="btn btn-acento btn-lg w-100">Crear cuenta</button>
+          </form>
+
+          <p class="divider"><span>O</span></p>
+
+          <button type="button" class="btn btn-contorno w-100">
+            <i class="bi bi-google" aria-hidden="true"></i> Registrarse con Google
+          </button>
+
+          <p class="auth-switch">¿Ya tienes cuenta? <a href="login.php">Inicia sesión</a></p>
+        </section>
       </div>
     </main>
 
@@ -193,7 +165,7 @@
       <div class="container">
         <div class="row g-4 footer-top">
           <div class="col-lg-6">
-            <a class="brand brand-light" href="index.html">
+            <a class="brand brand-light" href="index.php">
               <span class="brand-mark brand-mark-light" aria-hidden="true"
                 ><i class="bi bi-x-circle"></i
               ></span>
@@ -220,9 +192,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Tienda">
             <h2 class="footer-title">Tienda</h2>
             <ul class="footer-links">
-              <li><a href="catalogo.html">Nuevas Llegadas</a></li>
-              <li><a href="catalogo.html">Más Vendidos</a></li>
-              <li><a href="catalogo.html">Colecciones</a></li>
+              <li><a href="catalogo.php">Nuevas Llegadas</a></li>
+              <li><a href="catalogo.php">Más Vendidos</a></li>
+              <li><a href="catalogo.php">Colecciones</a></li>
             </ul>
           </nav>
 
@@ -239,9 +211,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Empresa">
             <h2 class="footer-title">Empresa</h2>
             <ul class="footer-links">
-              <li><a href="nosotros.html">Acerca de Nosotros</a></li>
+              <li><a href="nosotros.php">Acerca de Nosotros</a></li>
               <li><a href="#">Carreras</a></li>
-              <li><a href="contacto.html">Contacto</a></li>
+              <li><a href="contacto.php">Contacto</a></li>
             </ul>
           </nav>
         </div>

@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Titulo y descripcion -->
-    <title>Crear cuenta | SoleMate</title>
+    <!-- Titulo y descripcion modificados para login -->
+    <title>Iniciar sesión | SoleMate</title>
     <meta
       name="description"
-      content="Creá tu cuenta en SoleMate y comprá zapatillas importadas de Chile y Bolivia con envío rápido y cuotas sin interés."
+      content="Ingresá a tu cuenta de SoleMate para ver tus pedidos y comprar zapatillas importadas de Chile y Bolivia."
     />
 
     <meta name="theme-color" content="#d43f00" />
@@ -45,12 +45,12 @@
     <!-- ========== HEADER ========== -->
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="index.html">
+        <a class="brand" href="index.php">
           <span class="brand-mark" aria-hidden="true"><i class="bi bi-x-circle"></i></span>
           SOLEMATE
         </a>
 
-        <form class="search" role="search" action="catalogo.html">
+        <form class="search" role="search" action="catalogo.php">
           <label class="visually-hidden" for="buscar">Buscar zapatillas importadas</label>
           <i class="bi bi-search" aria-hidden="true"></i>
           <input
@@ -63,10 +63,10 @@
         </form>
 
         <nav class="header-actions" aria-label="Cuenta y carrito">
-          <a class="icon-link" href="login.html" aria-label="Iniciar sesión">
+          <a class="icon-link" href="login.php" aria-label="Iniciar sesión">
             <i class="bi bi-person" aria-hidden="true"></i>
           </a>
-          <a class="icon-link" href="carrito.html" aria-label="Carrito, 2 productos">
+          <a class="icon-link" href="carrito.php" aria-label="Carrito, 2 productos">
             <i class="bi bi-cart2" aria-hidden="true"></i>
             <span class="cart-count" aria-hidden="true">2</span>
           </a>
@@ -75,27 +75,12 @@
       </div>
     </header>
 
-    <!-- ========== MAIN ========== -->
-
     <main id="contenido" class="auth-main">
       <div class="container">
-        <section class="tarjeta auth-card" aria-labelledby="registro-titulo">
-          <h1 id="registro-titulo" class="auth-title">Crear Cuenta</h1>
+        <section class="tarjeta auth-card" aria-labelledby="login-titulo">
+          <h1 id="login-titulo" class="auth-title">Inicia Sesión</h1>
 
           <form>
-            <div class="mb-3">
-              <label class="form-label" for="nombre">Nombre completo</label>
-              <input
-                class="form-control"
-                type="text"
-                id="nombre"
-                name="nombre"
-                placeholder="Tu nombre y apellido"
-                autocomplete="name"
-                required
-              />
-            </div>
-
             <div class="mb-3">
               <label class="form-label" for="email">Correo Electrónico</label>
               <input
@@ -109,53 +94,30 @@
               />
             </div>
 
-            <div class="mb-3">
+            <div class="mb-4">
               <label class="form-label" for="password">Contraseña</label>
               <input
                 class="form-control"
                 type="password"
                 id="password"
                 name="password"
-                autocomplete="new-password"
-                minlength="8"
-                aria-describedby="ayuda-password"
+                placeholder="Tu contraseña"
+                autocomplete="current-password"
                 required
               />
-              <div id="ayuda-password" class="form-text">Mínimo 8 caracteres.</div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label" for="password2">Repetir contraseña</label>
-              <input
-                class="form-control"
-                type="password"
-                id="password2"
-                name="password2"
-                autocomplete="new-password"
-                minlength="8"
-                required
-              />
-            </div>
-
-            <div class="form-check mb-4">
-              <input class="form-check-input" type="checkbox" id="terminos" required />
-              <label class="form-check-label" for="terminos">
-                Acepto los <a href="#">Términos de Servicio</a> y la
-                <a href="#">Política de Privacidad</a>
-              </label>
             </div>
 
             <!-- Pasará a type="submit" cuando el formulario se conecte con JavaScript o un servidor -->
-            <button type="button" class="btn btn-acento btn-lg w-100">Crear cuenta</button>
+            <button type="button" class="btn btn-acento btn-lg w-100">Ingresar</button>
           </form>
 
           <p class="divider"><span>O</span></p>
 
           <button type="button" class="btn btn-contorno w-100">
-            <i class="bi bi-google" aria-hidden="true"></i> Registrarse con Google
+            <i class="bi bi-google" aria-hidden="true"></i> Continuar con Google
           </button>
 
-          <p class="auth-switch">¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
+          <p class="auth-switch">¿No tienes cuenta? <a href="registro.php">Regístrate</a></p>
         </section>
       </div>
     </main>
@@ -165,7 +127,7 @@
       <div class="container">
         <div class="row g-4 footer-top">
           <div class="col-lg-6">
-            <a class="brand brand-light" href="index.html">
+            <a class="brand brand-light" href="index.php">
               <span class="brand-mark brand-mark-light" aria-hidden="true"
                 ><i class="bi bi-x-circle"></i
               ></span>
@@ -192,9 +154,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Tienda">
             <h2 class="footer-title">Tienda</h2>
             <ul class="footer-links">
-              <li><a href="catalogo.html">Nuevas Llegadas</a></li>
-              <li><a href="catalogo.html">Más Vendidos</a></li>
-              <li><a href="catalogo.html">Colecciones</a></li>
+              <li><a href="catalogo.php">Nuevas Llegadas</a></li>
+              <li><a href="catalogo.php">Más Vendidos</a></li>
+              <li><a href="catalogo.php">Colecciones</a></li>
             </ul>
           </nav>
 
@@ -211,9 +173,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Empresa">
             <h2 class="footer-title">Empresa</h2>
             <ul class="footer-links">
-              <li><a href="nosotros.html">Acerca de Nosotros</a></li>
+              <li><a href="nosotros.php">Acerca de Nosotros</a></li>
               <li><a href="#">Carreras</a></li>
-              <li><a href="contacto.html">Contacto</a></li>
+              <li><a href="contacto.php">Contacto</a></li>
             </ul>
           </nav>
         </div>

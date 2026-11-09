@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Titulo y descripcion modificados para login -->
-    <title>Iniciar sesión | SoleMate</title>
+    <!-- Titulo y descripcion -->
+    <title>Guía de tallas | SoleMate</title>
     <meta
       name="description"
-      content="Ingresá a tu cuenta de SoleMate para ver tus pedidos y comprar zapatillas importadas de Chile y Bolivia."
+      content="Tabla de equivalencias de tallas de zapatillas en Argentina, EE. UU., Europa y centímetros para elegir tu talla ideal en SoleMate."
     />
 
     <meta name="theme-color" content="#d43f00" />
@@ -45,12 +45,12 @@
     <!-- ========== HEADER ========== -->
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="index.html">
+        <a class="brand" href="index.php">
           <span class="brand-mark" aria-hidden="true"><i class="bi bi-x-circle"></i></span>
           SOLEMATE
         </a>
 
-        <form class="search" role="search" action="catalogo.html">
+        <form class="search" role="search" action="catalogo.php">
           <label class="visually-hidden" for="buscar">Buscar zapatillas importadas</label>
           <i class="bi bi-search" aria-hidden="true"></i>
           <input
@@ -63,10 +63,10 @@
         </form>
 
         <nav class="header-actions" aria-label="Cuenta y carrito">
-          <a class="icon-link" href="login.html" aria-label="Iniciar sesión">
+          <a class="icon-link" href="login.php" aria-label="Iniciar sesión">
             <i class="bi bi-person" aria-hidden="true"></i>
           </a>
-          <a class="icon-link" href="carrito.html" aria-label="Carrito, 2 productos">
+          <a class="icon-link" href="carrito.php" aria-label="Carrito, 2 productos">
             <i class="bi bi-cart2" aria-hidden="true"></i>
             <span class="cart-count" aria-hidden="true">2</span>
           </a>
@@ -75,50 +75,87 @@
       </div>
     </header>
 
-    <main id="contenido" class="auth-main">
-      <div class="container">
-        <section class="tarjeta auth-card" aria-labelledby="login-titulo">
-          <h1 id="login-titulo" class="auth-title">Inicia Sesión</h1>
+    <!-- ========== MAIN ========== -->
+    <main id="contenido">
+      <div class="container section-padding pt-4">
+        <nav aria-label="Ruta de navegación">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.php">Inicio</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Guía de tallas</li>
+          </ol>
+        </nav>
 
-          <form>
-            <div class="mb-3">
-              <label class="form-label" for="email">Correo Electrónico</label>
-              <input
-                class="form-control"
-                type="email"
-                id="email"
-                name="email"
-                placeholder="tu@email.com"
-                autocomplete="email"
-                required
-              />
-            </div>
+        <section class="tarjeta size-card" aria-labelledby="tallas-titulo">
+          <h1 id="tallas-titulo" class="page-title mb-4">Guía de Tallas</h1>
 
-            <div class="mb-4">
-              <label class="form-label" for="password">Contraseña</label>
-              <input
-                class="form-control"
-                type="password"
-                id="password"
-                name="password"
-                placeholder="Tu contraseña"
-                autocomplete="current-password"
-                required
-              />
-            </div>
+          <div class="table-responsive">
+            <table class="table size-table">
+              <caption class="visually-hidden">
+                Equivalencias de tallas entre Argentina, Estados Unidos, Europa y centímetros
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">ARG</th>
+                  <th scope="col">US</th>
+                  <th scope="col">EU</th>
+                  <th scope="col">CM</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>38</td>
+                  <td>5.5</td>
+                  <td>38</td>
+                  <td>24</td>
+                </tr>
+                <tr>
+                  <td>39</td>
+                  <td>6.5</td>
+                  <td>39</td>
+                  <td>24.5</td>
+                </tr>
+                <tr>
+                  <td>40</td>
+                  <td>7</td>
+                  <td>40</td>
+                  <td>25</td>
+                </tr>
+                <tr>
+                  <td>41</td>
+                  <td>8</td>
+                  <td>41</td>
+                  <td>26</td>
+                </tr>
+                <tr>
+                  <td>42</td>
+                  <td>8.5</td>
+                  <td>42</td>
+                  <td>26.5</td>
+                </tr>
+                <tr>
+                  <td>43</td>
+                  <td>9.5</td>
+                  <td>43</td>
+                  <td>27.5</td>
+                </tr>
+                <tr>
+                  <td>44</td>
+                  <td>10</td>
+                  <td>44</td>
+                  <td>28</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-            <!-- Pasará a type="submit" cuando el formulario se conecte con JavaScript o un servidor -->
-            <button type="button" class="btn btn-acento btn-lg w-100">Ingresar</button>
-          </form>
-
-          <p class="divider"><span>O</span></p>
-
-          <button type="button" class="btn btn-contorno w-100">
-            <i class="bi bi-google" aria-hidden="true"></i> Continuar con Google
-          </button>
-
-          <p class="auth-switch">¿No tienes cuenta? <a href="registro.html">Regístrate</a></p>
+          <p class="size-note">
+            Referencia orientativa · US hombre. El calce puede variar según la marca.
+          </p>
         </section>
+
+        <p class="mt-4">
+          <a class="btn btn-acento" href="catalogo.php">Volver al catálogo</a>
+        </p>
       </div>
     </main>
 
@@ -127,7 +164,7 @@
       <div class="container">
         <div class="row g-4 footer-top">
           <div class="col-lg-6">
-            <a class="brand brand-light" href="index.html">
+            <a class="brand brand-light" href="index.php">
               <span class="brand-mark brand-mark-light" aria-hidden="true"
                 ><i class="bi bi-x-circle"></i
               ></span>
@@ -154,9 +191,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Tienda">
             <h2 class="footer-title">Tienda</h2>
             <ul class="footer-links">
-              <li><a href="catalogo.html">Nuevas Llegadas</a></li>
-              <li><a href="catalogo.html">Más Vendidos</a></li>
-              <li><a href="catalogo.html">Colecciones</a></li>
+              <li><a href="catalogo.php">Nuevas Llegadas</a></li>
+              <li><a href="catalogo.php">Más Vendidos</a></li>
+              <li><a href="catalogo.php">Colecciones</a></li>
             </ul>
           </nav>
 
@@ -173,9 +210,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Empresa">
             <h2 class="footer-title">Empresa</h2>
             <ul class="footer-links">
-              <li><a href="nosotros.html">Acerca de Nosotros</a></li>
+              <li><a href="nosotros.php">Acerca de Nosotros</a></li>
               <li><a href="#">Carreras</a></li>
-              <li><a href="contacto.html">Contacto</a></li>
+              <li><a href="contacto.php">Contacto</a></li>
             </ul>
           </nav>
         </div>

@@ -42,12 +42,12 @@
     <!-- ========== HEADER ========== -->
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="index.html">
+        <a class="brand" href="index.php">
           <span class="brand-mark" aria-hidden="true"><i class="bi bi-x-circle"></i></span>
           SOLEMATE
         </a>
 
-        <form class="search" role="search" action="catalogo.html">
+        <form class="search" role="search" action="catalogo.php">
           <label class="visually-hidden" for="buscar">Buscar zapatillas importadas</label>
           <i class="bi bi-search" aria-hidden="true"></i>
           <input
@@ -60,10 +60,10 @@
         </form>
 
         <nav class="header-actions" aria-label="Cuenta y carrito">
-          <a class="icon-link" href="login.html" aria-label="Iniciar sesión">
+          <a class="icon-link" href="login.php" aria-label="Iniciar sesión">
             <i class="bi bi-person" aria-hidden="true"></i>
           </a>
-          <a class="icon-link" href="carrito.html" aria-label="Carrito, 2 productos">
+          <a class="icon-link" href="carrito.php" aria-label="Carrito, 2 productos">
             <i class="bi bi-cart2" aria-hidden="true"></i>
             <span class="cart-count" aria-hidden="true">2</span>
           </a>
@@ -91,8 +91,8 @@
                 competitivos y selección curada para ti.
               </p>
               <div class="d-flex flex-wrap gap-3">
-                <a class="btn btn-acento" href="catalogo.html">COMPRAR AHORA</a>
-                <a class="btn btn-contorno" href="catalogo.html">Ver Colección</a>
+                <a class="btn btn-acento" href="catalogo.php">COMPRAR AHORA</a>
+                <a class="btn btn-contorno" href="catalogo.php">Ver Colección</a>
               </div>
             </div>
           </div>
@@ -114,7 +114,7 @@
                 />
                 <div class="card-body">
                   <h3 class="card-title">
-                    <a class="stretched-link" href="catalogo.html">Nike</a>
+                    <a class="stretched-link" href="catalogo.php">Nike</a>
                   </h3>
                   <p class="card-text">Importación Chile</p>
                 </div>
@@ -130,7 +130,7 @@
                 />
                 <div class="card-body">
                   <h3 class="card-title">
-                    <a class="stretched-link" href="catalogo.html">Jordan</a>
+                    <a class="stretched-link" href="catalogo.php">Jordan</a>
                   </h3>
                   <p class="card-text">Importación Chile</p>
                 </div>
@@ -146,7 +146,7 @@
                 />
                 <div class="card-body">
                   <h3 class="card-title">
-                    <a class="stretched-link" href="catalogo.html">Adidas</a>
+                    <a class="stretched-link" href="catalogo.php">Adidas</a>
                   </h3>
                   <p class="card-text">Importación Bolivia</p>
                 </div>
@@ -162,7 +162,7 @@
                 />
                 <div class="card-body">
                   <h3 class="card-title">
-                    <a class="stretched-link" href="catalogo.html">New Balance</a>
+                    <a class="stretched-link" href="catalogo.php">New Balance</a>
                   </h3>
                   <p class="card-text">Importación Bolivia</p>
                 </div>
@@ -275,7 +275,7 @@
                         <span class="talla-ref">ARG 38</span>
                       </div>
                       <h3 class="product-name">
-                        <a class="stretched-link" href="producto.html">Nike Air Max 270</a>
+                        <a class="stretched-link" href="producto.php">Nike Air Max 270</a>
                       </h3>
                       <p class="product-type">Zapatilla running</p>
                       <div class="price-row">
@@ -306,7 +306,7 @@
                         <span class="talla-ref">ARG 40</span>
                       </div>
                       <h3 class="product-name">
-                        <a class="stretched-link" href="producto.html">Adidas Ultraboost</a>
+                        <a class="stretched-link" href="producto.php">Adidas Ultraboost</a>
                       </h3>
                       <p class="product-type">Zapatilla running</p>
                       <div class="price-row">
@@ -337,7 +337,7 @@
                         <span class="talla-ref">ARG 41</span>
                       </div>
                       <h3 class="product-name">
-                        <a class="stretched-link" href="producto.html">Jordan 1 Retro</a>
+                        <a class="stretched-link" href="producto.php">Jordan 1 Retro</a>
                       </h3>
                       <p class="product-type">Zapatilla basketball</p>
                       <div class="price-row">
@@ -368,7 +368,7 @@
                         <span class="talla-ref">ARG 42</span>
                       </div>
                       <h3 class="product-name">
-                        <a class="stretched-link" href="producto.html">New Balance 990</a>
+                        <a class="stretched-link" href="producto.php">New Balance 990</a>
                       </h3>
                       <p class="product-type">Zapatilla lifestyle</p>
                       <div class="price-row">
@@ -467,12 +467,12 @@
                     <input class="btn-check" type="radio" name="talla" id="sel-44" />
                     <label class="btn pill pill-square" for="sel-44">44</label>
                   </div>
-                  <a class="size-guide-link" href="guia-tallas.html">Ver guía de tallas</a>
+                  <a class="size-guide-link" href="guia-tallas.php">Ver guía de tallas</a>
                 </fieldset>
 
                 <div class="d-flex flex-wrap gap-3 mb-4">
                   <button type="button" class="btn btn-acento btn-lg">Añadir al Carrito</button>
-                  <a class="btn btn-contorno btn-lg" href="checkout.html">Comprar Ahora</a>
+                  <a class="btn btn-contorno btn-lg" href="checkout.php">Comprar Ahora</a>
                 </div>
               </form>
 
@@ -569,7 +569,7 @@
       <div class="container">
         <div class="row g-4 footer-top">
           <div class="col-lg-6">
-            <a class="brand brand-light" href="index.html">
+            <a class="brand brand-light" href="index.php">
               <span class="brand-mark brand-mark-light" aria-hidden="true"
                 ><i class="bi bi-x-circle"></i
               ></span>
@@ -596,9 +596,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Tienda">
             <h2 class="footer-title">Tienda</h2>
             <ul class="footer-links">
-              <li><a href="catalogo.html">Nuevas Llegadas</a></li>
-              <li><a href="catalogo.html">Más Vendidos</a></li>
-              <li><a href="catalogo.html">Colecciones</a></li>
+              <li><a href="catalogo.php">Nuevas Llegadas</a></li>
+              <li><a href="catalogo.php">Más Vendidos</a></li>
+              <li><a href="catalogo.php">Colecciones</a></li>
             </ul>
           </nav>
 
@@ -615,9 +615,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Empresa">
             <h2 class="footer-title">Empresa</h2>
             <ul class="footer-links">
-              <li><a href="nosotros.html">Acerca de Nosotros</a></li>
+              <li><a href="nosotros.php">Acerca de Nosotros</a></li>
               <li><a href="#">Carreras</a></li>
-              <li><a href="contacto.html">Contacto</a></li>
+              <li><a href="contacto.php">Contacto</a></li>
             </ul>
           </nav>
         </div>

@@ -44,12 +44,12 @@
     <!-- ========== HEADER ========== -->
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="index.html">
+        <a class="brand" href="index.php">
           <span class="brand-mark" aria-hidden="true"><i class="bi bi-x-circle"></i></span>
           SOLEMATE
         </a>
 
-        <form class="search" role="search" action="catalogo.html">
+        <form class="search" role="search" action="catalogo.php">
           <label class="visually-hidden" for="buscar">Buscar zapatillas importadas</label>
           <i class="bi bi-search" aria-hidden="true"></i>
           <input
@@ -62,10 +62,10 @@
         </form>
 
         <nav class="header-actions" aria-label="Cuenta y carrito">
-          <a class="icon-link" href="login.html" aria-label="Iniciar sesión">
+          <a class="icon-link" href="login.php" aria-label="Iniciar sesión">
             <i class="bi bi-person" aria-hidden="true"></i>
           </a>
-          <a class="icon-link" href="carrito.html" aria-label="Carrito, 2 productos">
+          <a class="icon-link" href="carrito.php" aria-label="Carrito, 2 productos">
             <i class="bi bi-cart2" aria-hidden="true"></i>
             <span class="cart-count" aria-hidden="true">2</span>
           </a>
@@ -80,8 +80,8 @@
       <div class="container section-padding pt-4">
         <nav aria-label="Ruta de navegación">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="index.html">Inicio</a></li>
-            <li class="breadcrumb-item"><a href="carrito.html">Carrito</a></li>
+            <li class="breadcrumb-item"><a href="index.php">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="carrito.php">Carrito</a></li>
             <li class="breadcrumb-item active" aria-current="page">Finalizar compra</li>
           </ol>
         </nav>
@@ -267,7 +267,7 @@
                 </div>
               </dl>
 
-              <a class="continue-link" href="carrito.html">Volver al carrito</a>
+              <a class="continue-link" href="carrito.php">Volver al carrito</a>
             </div>
           </aside>
         </div>
@@ -279,7 +279,7 @@
       <div class="container">
         <div class="row g-4 footer-top">
           <div class="col-lg-6">
-            <a class="brand brand-light" href="index.html">
+            <a class="brand brand-light" href="index.php">
               <span class="brand-mark brand-mark-light" aria-hidden="true"
                 ><i class="bi bi-x-circle"></i
               ></span>
@@ -306,9 +306,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Tienda">
             <h2 class="footer-title">Tienda</h2>
             <ul class="footer-links">
-              <li><a href="catalogo.html">Nuevas Llegadas</a></li>
-              <li><a href="catalogo.html">Más Vendidos</a></li>
-              <li><a href="catalogo.html">Colecciones</a></li>
+              <li><a href="catalogo.php">Nuevas Llegadas</a></li>
+              <li><a href="catalogo.php">Más Vendidos</a></li>
+              <li><a href="catalogo.php">Colecciones</a></li>
             </ul>
           </nav>
 
@@ -325,9 +325,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Empresa">
             <h2 class="footer-title">Empresa</h2>
             <ul class="footer-links">
-              <li><a href="nosotros.html">Acerca de Nosotros</a></li>
+              <li><a href="nosotros.php">Acerca de Nosotros</a></li>
               <li><a href="#">Carreras</a></li>
-              <li><a href="contacto.html">Contacto</a></li>
+              <li><a href="contacto.php">Contacto</a></li>
             </ul>
           </nav>
         </div>

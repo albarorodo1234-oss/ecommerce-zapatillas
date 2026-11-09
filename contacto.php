@@ -4,11 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Titulo y descripcion -->
-    <title>Guía de tallas | SoleMate</title>
+    <title>Contacto | SoleMate</title>
     <meta
       name="description"
-      content="Tabla de equivalencias de tallas de zapatillas en Argentina, EE. UU., Europa y centímetros para elegir tu talla ideal en SoleMate."
+      content="Escribinos por consultas sobre pedidos, tallas, cambios o envíos. Atención por formulario, WhatsApp y correo electrónico."
     />
 
     <meta name="theme-color" content="#d43f00" />
@@ -45,12 +44,12 @@
     <!-- ========== HEADER ========== -->
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="index.html">
+        <a class="brand" href="index.php">
           <span class="brand-mark" aria-hidden="true"><i class="bi bi-x-circle"></i></span>
           SOLEMATE
         </a>
 
-        <form class="search" role="search" action="catalogo.html">
+        <form class="search" role="search" action="catalogo.php">
           <label class="visually-hidden" for="buscar">Buscar zapatillas importadas</label>
           <i class="bi bi-search" aria-hidden="true"></i>
           <input
@@ -63,10 +62,10 @@
         </form>
 
         <nav class="header-actions" aria-label="Cuenta y carrito">
-          <a class="icon-link" href="login.html" aria-label="Iniciar sesión">
+          <a class="icon-link" href="login.php" aria-label="Iniciar sesión">
             <i class="bi bi-person" aria-hidden="true"></i>
           </a>
-          <a class="icon-link" href="carrito.html" aria-label="Carrito, 2 productos">
+          <a class="icon-link" href="carrito.php" aria-label="Carrito, 2 productos">
             <i class="bi bi-cart2" aria-hidden="true"></i>
             <span class="cart-count" aria-hidden="true">2</span>
           </a>
@@ -80,82 +79,112 @@
       <div class="container section-padding pt-4">
         <nav aria-label="Ruta de navegación">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="index.html">Inicio</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Guía de tallas</li>
+            <li class="breadcrumb-item"><a href="index.php">Inicio</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Contacto</li>
           </ol>
         </nav>
 
-        <section class="tarjeta size-card" aria-labelledby="tallas-titulo">
-          <h1 id="tallas-titulo" class="page-title mb-4">Guía de Tallas</h1>
-
-          <div class="table-responsive">
-            <table class="table size-table">
-              <caption class="visually-hidden">
-                Equivalencias de tallas entre Argentina, Estados Unidos, Europa y centímetros
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">ARG</th>
-                  <th scope="col">US</th>
-                  <th scope="col">EU</th>
-                  <th scope="col">CM</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>38</td>
-                  <td>5.5</td>
-                  <td>38</td>
-                  <td>24</td>
-                </tr>
-                <tr>
-                  <td>39</td>
-                  <td>6.5</td>
-                  <td>39</td>
-                  <td>24.5</td>
-                </tr>
-                <tr>
-                  <td>40</td>
-                  <td>7</td>
-                  <td>40</td>
-                  <td>25</td>
-                </tr>
-                <tr>
-                  <td>41</td>
-                  <td>8</td>
-                  <td>41</td>
-                  <td>26</td>
-                </tr>
-                <tr>
-                  <td>42</td>
-                  <td>8.5</td>
-                  <td>42</td>
-                  <td>26.5</td>
-                </tr>
-                <tr>
-                  <td>43</td>
-                  <td>9.5</td>
-                  <td>43</td>
-                  <td>27.5</td>
-                </tr>
-                <tr>
-                  <td>44</td>
-                  <td>10</td>
-                  <td>44</td>
-                  <td>28</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <p class="size-note">
-            Referencia orientativa · US hombre. El calce puede variar según la marca.
-          </p>
-        </section>
-
-        <p class="mt-4">
-          <a class="btn btn-acento" href="catalogo.html">Volver al catálogo</a>
+        <h1 class="page-title">Contacto</h1>
+        <p class="results-count mb-4">
+          ¿Tenés dudas sobre un pedido, una talla o un envío? Escribinos y te respondemos a la
+          brevedad.
         </p>
+
+        <div class="row g-4">
+          <!-- Formulario -->
+          <section class="col-lg-7" aria-labelledby="mensaje-titulo">
+            <div class="tarjeta contact-card">
+              <h2 id="mensaje-titulo" class="checkout-title">Envianos un mensaje</h2>
+              <form>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label" for="nombre">Nombre</label>
+                    <input
+                      class="form-control"
+                      type="text"
+                      id="nombre"
+                      name="nombre"
+                      autocomplete="name"
+                      required
+                    />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label" for="email">Correo electrónico</label>
+                    <input
+                      class="form-control"
+                      type="email"
+                      id="email"
+                      name="email"
+                      placeholder="tu@email.com"
+                      autocomplete="email"
+                      required
+                    />
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label" for="asunto">Asunto</label>
+                    <select class="form-select" id="asunto" name="asunto" required>
+                      <option value="" selected disabled>Elegí una opción</option>
+                      <option>Consulta sobre un pedido</option>
+                      <option>Cambios y devoluciones</option>
+                      <option>Ayuda con las tallas</option>
+                      <option>Otro motivo</option>
+                    </select>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label" for="mensaje">Mensaje</label>
+                    <textarea
+                      class="form-control"
+                      id="mensaje"
+                      name="mensaje"
+                      rows="5"
+                      required
+                    ></textarea>
+                  </div>
+                  <div class="col-12">
+                    <!-- Pasará a type="submit" cuando el formulario se conecte con JavaScript o un servidor -->
+                    <button type="button" class="btn btn-acento btn-lg">Enviar mensaje</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <!-- Otras vías de contacto -->
+          <aside class="col-lg-5" aria-labelledby="vias-titulo">
+            <div class="tarjeta contact-card">
+              <h2 id="vias-titulo" class="checkout-title">Otras vías de contacto</h2>
+              <ul class="contact-list">
+                <li>
+                  <span class="contact-icon" aria-hidden="true"
+                    ><i class="bi bi-whatsapp"></i
+                  ></span>
+                  <div>
+                    <strong>WhatsApp</strong>
+                    <a href="https://wa.me/56912345678" target="_blank" rel="noopener noreferrer"
+                      >+56 9 1234 5678</a
+                    >
+                  </div>
+                </li>
+                <li>
+                  <span class="contact-icon" aria-hidden="true"
+                    ><i class="bi bi-envelope"></i
+                  ></span>
+                  <div>
+                    <strong>Correo electrónico</strong>
+                    <a href="mailto:hola@solemate.com">hola@solemate.com</a>
+                  </div>
+                </li>
+                <li>
+                  <span class="contact-icon" aria-hidden="true"><i class="bi bi-clock"></i></span>
+                  <div>
+                    <strong>Horario de atención</strong>
+                    <span>Lunes a viernes, de 9 a 18 h</span>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </aside>
+        </div>
       </div>
     </main>
 
@@ -164,7 +193,7 @@
       <div class="container">
         <div class="row g-4 footer-top">
           <div class="col-lg-6">
-            <a class="brand brand-light" href="index.html">
+            <a class="brand brand-light" href="index.php">
               <span class="brand-mark brand-mark-light" aria-hidden="true"
                 ><i class="bi bi-x-circle"></i
               ></span>
@@ -191,9 +220,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Tienda">
             <h2 class="footer-title">Tienda</h2>
             <ul class="footer-links">
-              <li><a href="catalogo.html">Nuevas Llegadas</a></li>
-              <li><a href="catalogo.html">Más Vendidos</a></li>
-              <li><a href="catalogo.html">Colecciones</a></li>
+              <li><a href="catalogo.php">Nuevas Llegadas</a></li>
+              <li><a href="catalogo.php">Más Vendidos</a></li>
+              <li><a href="catalogo.php">Colecciones</a></li>
             </ul>
           </nav>
 
@@ -210,9 +239,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Empresa">
             <h2 class="footer-title">Empresa</h2>
             <ul class="footer-links">
-              <li><a href="nosotros.html">Acerca de Nosotros</a></li>
+              <li><a href="nosotros.php">Acerca de Nosotros</a></li>
               <li><a href="#">Carreras</a></li>
-              <li><a href="contacto.html">Contacto</a></li>
+              <li><a href="contacto.php">Contacto</a></li>
             </ul>
           </nav>
         </div>
