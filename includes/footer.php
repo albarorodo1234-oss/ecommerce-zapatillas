@@ -71,7 +71,7 @@
         </div>
 
         <div class="footer-bottom">
-          <p>© 2026 SoleMate. Todos los derechos reservados.</p>
+          <p>© 2026 <?= htmlspecialchars(APP_NAME) ?>. Todos los derechos reservados.</p>
           <ul class="legal-links">
             <li><a href="#">Política de Privacidad</a></li>
             <li><a href="#">Términos de Servicio</a></li>

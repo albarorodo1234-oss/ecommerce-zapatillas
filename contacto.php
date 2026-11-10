@@ -99,7 +99,7 @@ require_once 'includes/header.php';
                   ></span>
                   <div>
                     <strong>Correo electrónico</strong>
-                    <a href="mailto:hola@solemate.com">hola@solemate.com</a>
+                    <a href="mailto:<?= htmlspecialchars(APP_EMAIL) ?>"><?= htmlspecialchars(APP_EMAIL) ?></a>
                   </div>
                 </li>
                 <li>
