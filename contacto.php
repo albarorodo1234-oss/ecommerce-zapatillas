@@ -1,6 +1,7 @@
 <?php
 $titulo_pagina      = "Contacto | SoleMate";
 $descripcion_pagina = "Escribinos por consultas sobre pedidos, tallas, cambios o envíos. Atención por formulario, WhatsApp y correo electrónico.";
+$pagina_activa      = "contacto";
 require_once 'includes/header.php';
 ?>
     <main id="contenido">

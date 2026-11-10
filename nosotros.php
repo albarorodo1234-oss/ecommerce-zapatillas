@@ -1,6 +1,7 @@
 <?php
 $titulo_pagina      = "Nosotros | SoleMate";
 $descripcion_pagina = "Conocé SoleMate: una tienda de zapatillas importadas de Chile y Bolivia, con productos 100% auténticas, envío rápido y cuotas sin interés.";
+$pagina_activa      = "nosotros";
 require_once 'includes/header.php';
 ?>
     <main id="contenido">

@@ -1,6 +1,7 @@
 <?php
 $titulo_pagina      = "Catálogo de zapatillas importadas | SoleMate";
 $descripcion_pagina = "Explorá el catálogo de SoleMate: zapatillas Nike, Jordan, Adidas y New Balance importadas de Chile y Bolivia. Filtrá por talla, precio, marca y origen.";
+$pagina_activa      = "catalogo";
 require_once 'includes/header.php';
 ?>
     <main id="contenido">

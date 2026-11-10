@@ -1,6 +1,7 @@
 <?php
 $titulo_pagina      = "Nike Air Max 270 | SoleMate";
 $descripcion_pagina = "Nike Air Max 270 importada de Chile. Aire visible de largo recorrido, parte superior ligera y diseño cómodo para el uso diario.";
+$pagina_activa      = "catalogo";
 require_once 'includes/header.php';
 ?>
  <main id="contenido">
