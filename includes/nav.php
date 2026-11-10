@@ -1,6 +1,18 @@
 <?php
 // includes/nav.php
-// Barra superior del sitio: logo, buscador y accesos de cuenta/carrito.
+// Barra superior del sitio: logo, buscador, accesos de cuenta/carrito y menú principal.
+// Cada página define ANTES de incluir el header:
+//   $pagina_activa  (opcional: "inicio", "catalogo", "nosotros" o "contacto")
+
+$pagina_activa = $pagina_activa ?? '';
+
+// Menú principal: clave => [texto visible, archivo al que lleva]
+$menu = [
+    'inicio'   => ['Inicio',   'index.php'],
+    'catalogo' => ['Catálogo', 'catalogo.php'],
+    'nosotros' => ['Nosotros', 'nosotros.php'],
+    'contacto' => ['Contacto', 'contacto.php'],
+];
 ?>
     <!-- ========== HEADER ========== -->
     <header class="site-header">
@@ -33,4 +45,22 @@
           <button class="btn-lang" type="button" aria-label="Idioma: español">ES</button>
         </nav>
       </div>
+
+      <!-- Menú principal: la clase "active" la decide PHP en el servidor -->
+      <nav class="main-nav" aria-label="Principal">
+        <div class="container">
+          <ul class="main-nav-list">
+            <?php foreach ($menu as $clave => [$texto, $enlace]): ?>
+              <li>
+                <a
+                  class="main-nav-link<?= $clave === $pagina_activa ? ' active' : '' ?>"
+                  href="<?= $enlace ?>"
+                  <?= $clave === $pagina_activa ? 'aria-current="page"' : '' ?>
+                  ><?= $texto ?></a
+                >
+              </li>
+            <?php endforeach; ?>
+          </ul>
+        </div>
+      </nav>
     </header>
