@@ -2,6 +2,7 @@
 $titulo_pagina      = "Catálogo de zapatillas importadas | SoleMate";
 $descripcion_pagina = "Explorá el catálogo de SoleMate: zapatillas Nike, Jordan, Adidas y New Balance importadas de Chile y Bolivia. Filtrá por talla, precio, marca y origen.";
 $pagina_activa      = "catalogo";
+$busqueda           = isset($_GET['q']) && is_string($_GET['q']) ? trim($_GET['q']) : '';
 require_once 'includes/header.php';
 ?>
     <main id="contenido">
@@ -16,7 +17,12 @@ require_once 'includes/header.php';
         <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
           <div>
             <h1 class="page-title">Catálogo de Productos</h1>
-            <p class="results-count mb-0">Mostrando 4 productos</p>
+            <p class="results-count mb-0">
+             Mostrando 4 productos
+            <?php if ($busqueda !== ''): ?>
+              · Buscaste: <strong><?= htmlspecialchars($busqueda) ?></strong>
+            <?php endif; ?>
+            </p>
           </div>
           <div>
             <label class="visually-hidden" for="orden">Ordenar productos</label>
