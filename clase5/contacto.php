@@ -2,6 +2,66 @@
 $titulo_pagina      = "Contacto | SoleMate";
 $descripcion_pagina = "Escribinos por consultas sobre pedidos, tallas, cambios o envíos. Atención por formulario, WhatsApp y correo electrónico.";
 $pagina_activa      = "contacto";
+require_once 'includes/funciones.php';
+
+// Asuntos permitidos (los mismos que tiene el <select> del formulario).
+$asuntos_validos = [
+    'Consulta sobre un pedido',
+    'Cambios y devoluciones',
+    'Ayuda con las tallas',
+    'Otro motivo',
+];
+
+// Variables de control: el paso 7 las usará para mostrar mensajes.
+$errores = [];
+$exito   = false;
+$datos   = ['nombre' => '', 'email' => '', 'asunto' => '', 'mensaje' => ''];
+
+// Solo procesamos si la página fue pedida por POST (no al entrar directo por la URL).
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // 1. Captura: leer cada campo (dato_post usa isset y trim).
+    $nombre  = dato_post('nombre');
+    $asunto  = dato_post('asunto');
+    $mensaje = dato_post('mensaje');
+
+    // 2. Sanitización del email: elimina los caracteres que no puede tener un correo.
+    $email = filter_var(dato_post('email'), FILTER_SANITIZE_EMAIL);
+
+    // Guardamos lo recibido para volver a mostrarlo en el formulario (paso 7).
+    $datos = ['nombre' => $nombre, 'email' => $email, 'asunto' => $asunto, 'mensaje' => $mensaje];
+
+    // 3. Validaciones en el servidor.
+    if ($nombre === '') {
+        $errores['nombre'] = 'El nombre es obligatorio.';
+    } elseif (mb_strlen($nombre) > 80) {
+        $errores['nombre'] = 'El nombre no puede superar los 80 caracteres.';
+    }
+
+    if ($email === '') {
+        $errores['email'] = 'El correo electrónico es obligatorio.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errores['email'] = 'Ingresá un correo electrónico válido (por ejemplo, tu@email.com).';
+    }
+
+    if (!in_array($asunto, $asuntos_validos, true)) {
+        $errores['asunto'] = 'Elegí un asunto de la lista.';
+    }
+
+    if ($mensaje === '') {
+        $errores['mensaje'] = 'El mensaje es obligatorio.';
+    } elseif (mb_strlen($mensaje) < 10) {
+        $errores['mensaje'] = 'El mensaje debe tener al menos 10 caracteres.';
+    } elseif (mb_strlen($mensaje) > 1000) {
+        $errores['mensaje'] = 'El mensaje no puede superar los 1000 caracteres.';
+    }
+
+    // 4. Si no hubo ningún error, el envío fue exitoso.
+    if (empty($errores)) {
+        $exito = true;
+        // En un sitio real, aquí se enviaría un correo o se guardaría en una base de datos.
+    }
+}
 require_once 'includes/header.php';
 ?>
     <main id="contenido">
