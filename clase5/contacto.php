@@ -24,7 +24,7 @@ require_once 'includes/header.php';
           <section class="col-lg-7" aria-labelledby="mensaje-titulo">
             <div class="tarjeta contact-card">
               <h2 id="mensaje-titulo" class="checkout-title">Envianos un mensaje</h2>
-              <form>
+              <form method="post" action="contacto.php" novalidate>
                 <div class="row g-3">
                   <div class="col-md-6">
                     <label class="form-label" for="nombre">Nombre</label>
@@ -70,8 +70,7 @@ require_once 'includes/header.php';
                     ></textarea>
                   </div>
                   <div class="col-12">
-                    <!-- Pasará a type="submit" cuando el formulario se conecte con JavaScript o un servidor -->
-                    <button type="button" class="btn btn-acento btn-lg">Enviar mensaje</button>
+                    <button type="submit" class="btn btn-acento btn-lg">Enviar mensaje</button>
                   </div>
                 </div>
               </form>
