@@ -3,6 +3,61 @@ $titulo_pagina      = "Catálogo de zapatillas importadas | SoleMate";
 $descripcion_pagina = "Explorá el catálogo de SoleMate: zapatillas Nike, Jordan, Adidas y New Balance importadas de Chile y Bolivia. Filtrá por talla, precio, marca y origen.";
 $pagina_activa      = "catalogo";
 $busqueda           = isset($_GET['q']) && is_string($_GET['q']) ? trim($_GET['q']) : '';
+
+require_once 'includes/funciones.php';
+
+// Listas de valores permitidos para los filtros (se usan al armar el formulario
+// y, más adelante, para validar lo que llegue por GET).
+$tallas_disponibles  = [38, 39, 40, 41, 42, 43, 44];
+$marcas_disponibles  = ['nike' => 'Nike', 'jordan' => 'Jordan', 'adidas' => 'Adidas', 'nb' => 'New Balance'];
+$origenes_disponibles = ['chile' => 'Chile', 'bolivia' => 'Bolivia'];
+$precio_minimo = 50000;
+$precio_maximo = 300000;
+$precio_paso   = 10000;
+
+// Catálogo de productos (en un sitio real saldría de una base de datos).
+$productos = [
+    [
+        'nombre' => 'Nike Air Max 270',
+        'marca'  => 'nike',
+        'origen' => 'chile',
+        'talla'  => 38,
+        'precio' => 189900,
+        'tipo'   => 'Zapatilla running',
+        'imagen' => 'img/nike-air-max-270.jpg',
+        'alt'    => 'Zapatilla Nike Air Max 270 blanca con suela roja',
+    ],
+    [
+        'nombre' => 'Adidas Ultraboost',
+        'marca'  => 'adidas',
+        'origen' => 'bolivia',
+        'talla'  => 40,
+        'precio' => 219900,
+        'tipo'   => 'Zapatilla running',
+        'imagen' => 'img/adidas-ultraboost.jpg',
+        'alt'    => 'Zapatilla Adidas Ultraboost negra con suela blanca',
+    ],
+    [
+        'nombre' => 'Jordan 1 Retro',
+        'marca'  => 'jordan',
+        'origen' => 'chile',
+        'talla'  => 41,
+        'precio' => 249900,
+        'tipo'   => 'Zapatilla basketball',
+        'imagen' => 'img/jordan-1-retro.jpg',
+        'alt'    => 'Zapatilla Jordan 1 Retro roja, blanca y negra',
+    ],
+    [
+        'nombre' => 'New Balance 990',
+        'marca'  => 'nb',
+        'origen' => 'bolivia',
+        'talla'  => 42,
+        'precio' => 229900,
+        'tipo'   => 'Zapatilla lifestyle',
+        'imagen' => 'img/new-balance-990.jpg',
+        'alt'    => 'Zapatilla New Balance 990 gris',
+    ],
+];
 require_once 'includes/header.php';
 ?>
     <main id="contenido">
@@ -114,29 +169,30 @@ require_once 'includes/header.php';
           <section class="col-lg-9" aria-labelledby="listado-titulo">
             <h2 id="listado-titulo" class="visually-hidden">Listado de productos</h2>
             <div class="row g-3">
+              <?php foreach ($productos as $producto): ?>
               <div class="col-12 col-sm-6 col-xl-3">
                 <article class="card tarjeta product-card">
                   <img
-                    src="img/nike-air-max-270.jpg"
+                    src="<?= e($producto['imagen']) ?>"
                     class="card-img-top"
-                    alt="Zapatilla Nike Air Max 270 blanca con suela roja"
+                    alt="<?= e($producto['alt']) ?>"
                     loading="lazy"
                   />
                   <div class="card-body">
                     <div class="meta">
-                      <span class="badge-origen">Chile</span>
-                      <span class="talla-ref">ARG 38</span>
+                      <span class="badge-origen"><?= e($origenes_disponibles[$producto['origen']]) ?></span>
+                      <span class="talla-ref">ARG <?= e($producto['talla']) ?></span>
                     </div>
                     <h3 class="product-name">
-                      <a class="stretched-link" href="producto.php">Nike Air Max 270</a>
+                      <a class="stretched-link" href="producto.php"><?= e($producto['nombre']) ?></a>
                     </h3>
-                    <p class="product-type">Zapatilla running</p>
+                    <p class="product-type"><?= e($producto['tipo']) ?></p>
                     <div class="price-row">
-                      <p class="price">ARS $189.900</p>
+                      <p class="price">ARS $<?= number_format($producto['precio'], 0, ',', '.') ?></p>
                       <button
                         type="button"
                         class="btn btn-acento btn-sm btn-add"
-                        aria-label="Añadir Nike Air Max 270 al carrito"
+                        aria-label="Añadir <?= e($producto['nombre']) ?> al carrito"
                       >
                         Añadir
                       </button>
@@ -144,99 +200,7 @@ require_once 'includes/header.php';
                   </div>
                 </article>
               </div>
-
-              <div class="col-12 col-sm-6 col-xl-3">
-                <article class="card tarjeta product-card">
-                  <img
-                    src="img/adidas-ultraboost.jpg"
-                    class="card-img-top"
-                    alt="Zapatilla Adidas Ultraboost negra con suela blanca"
-                    loading="lazy"
-                  />
-                  <div class="card-body">
-                    <div class="meta">
-                      <span class="badge-origen">Bolivia</span>
-                      <span class="talla-ref">ARG 40</span>
-                    </div>
-                    <h3 class="product-name">
-                      <a class="stretched-link" href="producto.php">Adidas Ultraboost</a>
-                    </h3>
-                    <p class="product-type">Zapatilla running</p>
-                    <div class="price-row">
-                      <p class="price">ARS $219.900</p>
-                      <button
-                        type="button"
-                        class="btn btn-acento btn-sm btn-add"
-                        aria-label="Añadir Adidas Ultraboost al carrito"
-                      >
-                        Añadir
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              </div>
-
-              <div class="col-12 col-sm-6 col-xl-3">
-                <article class="card tarjeta product-card">
-                  <img
-                    src="img/jordan-1-retro.jpg"
-                    class="card-img-top"
-                    alt="Zapatilla Jordan 1 Retro roja, blanca y negra"
-                    loading="lazy"
-                  />
-                  <div class="card-body">
-                    <div class="meta">
-                      <span class="badge-origen">Chile</span>
-                      <span class="talla-ref">ARG 41</span>
-                    </div>
-                    <h3 class="product-name">
-                      <a class="stretched-link" href="producto.php">Jordan 1 Retro</a>
-                    </h3>
-                    <p class="product-type">Zapatilla basketball</p>
-                    <div class="price-row">
-                      <p class="price">ARS $249.900</p>
-                      <button
-                        type="button"
-                        class="btn btn-acento btn-sm btn-add"
-                        aria-label="Añadir Jordan 1 Retro al carrito"
-                      >
-                        Añadir
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              </div>
-
-              <div class="col-12 col-sm-6 col-xl-3">
-                <article class="card tarjeta product-card">
-                  <img
-                    src="img/new-balance-990.jpg"
-                    class="card-img-top"
-                    alt="Zapatilla New Balance 990 gris"
-                    loading="lazy"
-                  />
-                  <div class="card-body">
-                    <div class="meta">
-                      <span class="badge-origen">Bolivia</span>
-                      <span class="talla-ref">ARG 42</span>
-                    </div>
-                    <h3 class="product-name">
-                      <a class="stretched-link" href="producto.php">New Balance 990</a>
-                    </h3>
-                    <p class="product-type">Zapatilla lifestyle</p>
-                    <div class="price-row">
-                      <p class="price">ARS $229.900</p>
-                      <button
-                        type="button"
-                        class="btn btn-acento btn-sm btn-add"
-                        aria-label="Añadir New Balance 990 al carrito"
-                      >
-                        Añadir
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              </div>
+              <?php endforeach; ?>
             </div>
           </section>
         </div>
