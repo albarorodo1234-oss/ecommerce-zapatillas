@@ -92,27 +92,20 @@ require_once 'includes/header.php';
         <div class="row g-4">
           <!-- Filtros -->
           <aside class="col-lg-3" aria-label="Filtros del catálogo">
-            <form class="tarjeta filters filters-sticky">
+                      <form class="tarjeta filters filters-sticky" method="get" action="catalogo.php">
               <h2 class="filters-title">Filtros</h2>
               <p class="filters-sub">Refina tu búsqueda</p>
+
+              <!-- Conserva la búsqueda del menú cuando se aplican los filtros -->
+              <input type="hidden" name="q" value="<?= e($busqueda) ?>" />
 
               <fieldset class="filter-group">
                 <legend>Tallas</legend>
                 <div class="pill-group">
-                  <input class="btn-check" type="checkbox" id="talla-38" />
-                  <label class="btn pill" for="talla-38">38</label>
-                  <input class="btn-check" type="checkbox" id="talla-39" />
-                  <label class="btn pill" for="talla-39">39</label>
-                  <input class="btn-check" type="checkbox" id="talla-40" />
-                  <label class="btn pill" for="talla-40">40</label>
-                  <input class="btn-check" type="checkbox" id="talla-41" />
-                  <label class="btn pill" for="talla-41">41</label>
-                  <input class="btn-check" type="checkbox" id="talla-42" />
-                  <label class="btn pill" for="talla-42">42</label>
-                  <input class="btn-check" type="checkbox" id="talla-43" />
-                  <label class="btn pill" for="talla-43">43</label>
-                  <input class="btn-check" type="checkbox" id="talla-44" />
-                  <label class="btn pill" for="talla-44">44</label>
+                  <?php foreach ($tallas_disponibles as $talla): ?>
+                    <input class="btn-check" type="checkbox" id="talla-<?= e($talla) ?>" name="talla[]" value="<?= e($talla) ?>" />
+                    <label class="btn pill" for="talla-<?= e($talla) ?>"><?= e($talla) ?></label>
+                  <?php endforeach; ?>
                 </div>
               </fieldset>
 
@@ -123,46 +116,44 @@ require_once 'includes/header.php';
                   class="form-range"
                   type="range"
                   id="precio-max"
-                  min="50000"
-                  max="300000"
-                  step="10000"
-                  value="300000"
+                  name="precio_max"
+                  min="<?= $precio_minimo ?>"
+                  max="<?= $precio_maximo ?>"
+                  step="<?= $precio_paso ?>"
+                  value="<?= $precio_maximo ?>"
                 />
                 <div class="range-labels">
-                  <span>ARS $50.000</span>
-                  <span>ARS $300.000</span>
+                  <span>ARS $<?= number_format($precio_minimo, 0, ',', '.') ?></span>
+                  <span>ARS $<?= number_format($precio_maximo, 0, ',', '.') ?></span>
                 </div>
               </fieldset>
 
               <fieldset class="filter-group">
                 <legend>Marcas</legend>
                 <div class="pill-group">
-                  <input class="btn-check" type="checkbox" id="marca-nike" />
-                  <label class="btn pill" for="marca-nike">Nike</label>
-                  <input class="btn-check" type="checkbox" id="marca-jordan" />
-                  <label class="btn pill" for="marca-jordan">Jordan</label>
-                  <input class="btn-check" type="checkbox" id="marca-adidas" />
-                  <label class="btn pill" for="marca-adidas">Adidas</label>
-                  <input class="btn-check" type="checkbox" id="marca-nb" />
-                  <label class="btn pill" for="marca-nb">New Balance</label>
+                  <?php foreach ($marcas_disponibles as $clave => $etiqueta): ?>
+                    <input class="btn-check" type="checkbox" id="marca-<?= e($clave) ?>" name="marca[]" value="<?= e($clave) ?>" />
+                    <label class="btn pill" for="marca-<?= e($clave) ?>"><?= e($etiqueta) ?></label>
+                  <?php endforeach; ?>
                 </div>
               </fieldset>
 
               <fieldset class="filter-group">
                 <legend>Origen</legend>
                 <div class="pill-group">
-                  <input class="btn-check" type="checkbox" id="origen-chile" />
-                  <label class="btn pill" for="origen-chile">Chile</label>
-                  <input class="btn-check" type="checkbox" id="origen-bolivia" />
-                  <label class="btn pill" for="origen-bolivia">Bolivia</label>
+                  <?php foreach ($origenes_disponibles as $clave => $etiqueta): ?>
+                    <input class="btn-check" type="checkbox" id="origen-<?= e($clave) ?>" name="origen[]" value="<?= e($clave) ?>" />
+                    <label class="btn pill" for="origen-<?= e($clave) ?>"><?= e($etiqueta) ?></label>
+                  <?php endforeach; ?>
                 </div>
               </fieldset>
 
               <div class="d-flex gap-2">
-                <button type="button" class="btn btn-acento flex-fill">Aplicar</button>
-                <button type="reset" class="btn btn-contorno flex-fill">Limpiar</button>
+                <button type="submit" class="btn btn-acento flex-fill">Aplicar</button>
+                <a href="catalogo.php" class="btn btn-contorno flex-fill">Limpiar</a>
               </div>
-            </form>
+            </form>  
+
           </aside>
 
           <!-- Listado de productos -->
