@@ -58,6 +58,87 @@ $productos = [
         'alt'    => 'Zapatilla New Balance 990 gris',
     ],
 ];
+// ----- Lectura, validación y filtrado de los datos que llegan por GET -----
+$errores_filtros = [];
+
+// Búsqueda de texto (viene del buscador del menú): máximo 60 caracteres.
+// $busqueda ya pasó por isset, is_string y trim en la primera parte del archivo.
+if (mb_strlen($busqueda) > 60) {
+    $busqueda = mb_substr($busqueda, 0, 60);
+    $errores_filtros['q'] = 'La búsqueda se acortó a 60 caracteres.';
+}
+
+// Tallas: cada valor debe ser un número entero y estar en la lista permitida.
+$tallas_elegidas = [];
+foreach (dato_get_lista('talla') as $valor) {
+    $talla = filter_var(trim($valor), FILTER_VALIDATE_INT);
+    if ($talla !== false && in_array($talla, $tallas_disponibles, true)) {
+        $tallas_elegidas[] = $talla;
+    } else {
+        $errores_filtros['talla'] = 'Se ignoró una talla que no existe.';
+    }
+}
+
+// Marcas: cada valor debe ser una clave de $marcas_disponibles.
+$marcas_elegidas = [];
+foreach (dato_get_lista('marca') as $valor) {
+    $valor = trim($valor);
+    if (isset($marcas_disponibles[$valor])) {
+        $marcas_elegidas[] = $valor;
+    } else {
+        $errores_filtros['marca'] = 'Se ignoró una marca que no existe.';
+    }
+}
+
+// Orígenes: cada valor debe ser una clave de $origenes_disponibles.
+$origenes_elegidos = [];
+foreach (dato_get_lista('origen') as $valor) {
+    $valor = trim($valor);
+    if (isset($origenes_disponibles[$valor])) {
+        $origenes_elegidos[] = $valor;
+    } else {
+        $errores_filtros['origen'] = 'Se ignoró un origen que no existe.';
+    }
+}
+
+// Precio máximo: un entero entre el mínimo y el máximo del deslizador.
+$precio_tope = $precio_maximo;
+$precio_recibido = dato_get('precio_max');
+if ($precio_recibido !== '') {
+    $precio_valido = filter_var($precio_recibido, FILTER_VALIDATE_INT, [
+        'options' => ['min_range' => $precio_minimo, 'max_range' => $precio_maximo],
+    ]);
+    if ($precio_valido === false) {
+        $errores_filtros['precio_max'] = 'Se ignoró un precio máximo fuera del rango permitido.';
+    } else {
+        $precio_tope = $precio_valido;
+    }
+}
+
+// Filtrado: un producto se queda solo si cumple TODOS los filtros activos.
+$productos_filtrados = [];
+foreach ($productos as $producto) {
+    $texto_producto = $producto['nombre'] . ' ' . $marcas_disponibles[$producto['marca']] . ' ' . $producto['tipo'];
+
+    if ($busqueda !== '' && mb_stripos($texto_producto, $busqueda) === false) {
+        continue;
+    }
+    if (!empty($tallas_elegidas) && !in_array($producto['talla'], $tallas_elegidas, true)) {
+        continue;
+    }
+    if (!empty($marcas_elegidas) && !in_array($producto['marca'], $marcas_elegidas, true)) {
+        continue;
+    }
+    if (!empty($origenes_elegidos) && !in_array($producto['origen'], $origenes_elegidos, true)) {
+        continue;
+    }
+    if ($producto['precio'] > $precio_tope) {
+        continue;
+    }
+
+    $productos_filtrados[] = $producto;
+}
+
 require_once 'includes/header.php';
 ?>
     <main id="contenido">
@@ -160,7 +241,7 @@ require_once 'includes/header.php';
           <section class="col-lg-9" aria-labelledby="listado-titulo">
             <h2 id="listado-titulo" class="visually-hidden">Listado de productos</h2>
             <div class="row g-3">
-              <?php foreach ($productos as $producto): ?>
+              <?php foreach ($productos_filtrados as $producto): ?>
               <div class="col-12 col-sm-6 col-xl-3">
                 <article class="card tarjeta product-card">
                   <img
