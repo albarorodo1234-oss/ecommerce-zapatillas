@@ -1,15 +1,17 @@
 # SoleMate – Ecommerce de zapatillas importadas
 
-Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en dos etapas:
+Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en tres etapas:
 
 - **TP N° 3:** maquetación front-end en HTML5 semántico, CSS3 y Bootstrap, con Git Workflow, SEO y accesibilidad.
 - **TP N° 4:** _Migración a PHP, Modularización (SSI) y Renderizado Server-Side (SSR)_. Las 10 vistas pasaron de HTML estático a PHP, con plantillas reutilizables, título y menú dinámicos, y variables de entorno.
+- **TP N° 5:** _Procesamiento de formularios y seguridad web_. Formulario de contacto por POST y buscador con filtros del catálogo por GET, con sanitización, validación en el servidor, mensajes al usuario y prevención de XSS. Todo el desarrollo está en la carpeta [`clase5/`](clase5/).
 
 ## Enlaces
 
 - **Repositorio:** https://github.com/albarorodo1234-oss/ecommerce-zapatillas
 - **Prototipo en Figma:** [Ver el prototipo](https://www.figma.com/proto/jUfOsxLjA2Qn9kg3WJqB8j/Ecomerce-Zapatillas?node-id=2-3&p=f&t=eQLWJaIzpomdRZIH-1&scaling=scale-down-width&content-scaling=fixed&page-id=0%3A1)
 - **Informe de auditoría Lighthouse (TP N° 3):** [docs/auditoria-lighthouse.md](docs/auditoria-lighthouse.md)
+- **Desarrollo del TP N° 5:** [carpeta clase5/](clase5/) · [sección del README](#clase-5-procesamiento-de-formularios-y-seguridad-web-tp-n-5)
 
 > **Nota sobre la publicación:** en el TP N° 3 el sitio era HTML estático y se publicaba en GitHub Pages. Desde el TP N° 4 las vistas son `.php` y necesitan un servidor con PHP, que GitHub Pages no ofrece. Por eso el sitio se ejecuta en local con XAMPP (ver [Cómo ejecutarlo localmente](#cómo-ejecutarlo-localmente)).
 
@@ -115,6 +117,122 @@ Al buscar `<script>alert('XSS')</script>`, el catálogo muestra el texto tal cua
 
 ![Búsqueda con script escapado](docs/tp4-xss-catalogo.png)
 
+## Clase 5: Procesamiento de formularios y seguridad web (TP N° 5)
+
+Todo el desarrollo de este trabajo práctico está en la carpeta [`clase5/`](clase5/), que parte de una copia del proyecto del TP N° 4 e incorpora el procesamiento de formularios del lado del servidor, con sanitización y validación para prevenir **XSS** (_Cross-Site Scripting_).
+
+| Requisito de la consigna   | Cómo se resolvió                                                                                                                                                                                                                 |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Formulario por POST**    | `clase5/contacto.php`: formulario de contacto (nombre, correo, asunto y mensaje) que se envía y se procesa en la misma página.                                                                                                   |
+| **Formulario por GET**     | `clase5/catalogo.php`: buscador del menú y filtros del catálogo (tallas, precio máximo, marcas y origen), que filtran los productos de verdad.                                                                                   |
+| **Sanitización estricta**  | Todo dato de `$_POST` o `$_GET` pasa por `isset`, `is_string` y `trim()`; el correo, además, por `filter_var()` con `FILTER_SANITIZE_EMAIL`. Al imprimir se usa `e()`, que aplica `htmlspecialchars()` con `ENT_QUOTES` y UTF-8. |
+| **Validación en servidor** | Campos obligatorios no vacíos, formato de correo con `FILTER_VALIDATE_EMAIL`, largos mínimos y máximos, y valores permitidos mediante listas blancas.                                                                            |
+| **Mensajes al usuario**    | Aviso verde si el envío fue exitoso; aviso rojo y un texto bajo cada campo con error. En el catálogo: cantidad real de resultados, aviso si no hay coincidencias y aviso si se ignoró un filtro inválido.                        |
+| **Persistencia de datos**  | Si hay errores, el formulario conserva lo escrito. En el catálogo se mantienen las casillas marcadas, el deslizador de precio y la búsqueda.                                                                                     |
+
+### Formulario POST: contacto
+
+El formulario de [`clase5/contacto.php`](clase5/contacto.php) se envía por **POST** a la misma página, que lo procesa antes de dibujar el HTML. Lleva el atributo `novalidate` para que el navegador no bloquee el envío: los atributos `required` y `type="email"` quedan como ayuda de usabilidad, pero la validación que cuenta es la del servidor.
+
+| Campo     | Reglas en el servidor                                                                     |
+| --------- | ----------------------------------------------------------------------------------------- |
+| `nombre`  | Obligatorio; máximo 80 caracteres                                                         |
+| `email`   | Obligatorio; se sanea con `FILTER_SANITIZE_EMAIL` y se valida con `FILTER_VALIDATE_EMAIL` |
+| `asunto`  | Debe ser una de las 4 opciones permitidas (lista blanca comprobada con `in_array`)        |
+| `mensaje` | Obligatorio; entre 10 y 1000 caracteres                                                   |
+
+Extracto simplificado de la lógica:
+
+```php
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {            // solo si llegó por POST
+    $nombre = dato_post('nombre');                        // isset + is_string + trim
+    $email  = filter_var(dato_post('email'), FILTER_SANITIZE_EMAIL);
+
+    if ($nombre === '') {
+        $errores['nombre'] = 'El nombre es obligatorio.';
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errores['email'] = 'Ingresá un correo electrónico válido (por ejemplo, tu@email.com).';
+    }
+    // ... el asunto y el mensaje se validan de forma similar
+
+    if (empty($errores)) {
+        $exito = true;                                    // se muestra el aviso verde
+    }
+}
+```
+
+Los datos no se escapan al recibirlos sino **al imprimirlos** con `e()` (por ejemplo, `value="<?= e($datos['nombre']) ?>"`), para no mostrar mal un apóstrofo como en _D'Angelo_ y, a la vez, neutralizar cualquier etiqueta HTML.
+
+Con el formulario vacío se muestra un aviso general y un mensaje bajo cada campo:
+
+![Contacto con errores de validación](clase5/docs/tp5-01-contacto-errores.png)
+
+Con un correo inválido, solo ese campo marca error y los demás **conservan lo escrito**:
+
+![Contacto: persistencia de los datos](clase5/docs/tp5-02-contacto-persistencia.png)
+
+Con datos correctos, se muestra el aviso de éxito y el formulario queda vacío:
+
+![Contacto: envío exitoso](clase5/docs/tp5-03-contacto-exito.png)
+
+**Prueba de XSS en el cuerpo de la página:** al escribir `<script>alert('XSS')</script>` como nombre, el aviso lo muestra como texto y no se ejecuta nada:
+
+![XSS en el mensaje de éxito](clase5/docs/tp5-04-xss-mensaje-exito.png)
+
+**Prueba de XSS dentro de un atributo:** al escribir `"><img src=x onerror=alert(1)>` como nombre, el campo vuelve a mostrar ese texto literal y no se rompe el atributo `value`, porque `e()` usa `ENT_QUOTES`:
+
+![XSS en un atributo del formulario](clase5/docs/tp5-05-xss-atributo.png)
+
+### Formulario GET: buscador y filtros del catálogo
+
+El buscador del menú y el panel de filtros de [`clase5/catalogo.php`](clase5/catalogo.php) se envían por **GET**: los datos viajan en la URL, de modo que cada búsqueda se puede guardar en favoritos o compartir como enlace. Los 4 productos están en un arreglo PHP y se filtran en el servidor.
+
+| Parámetro    | Origen                                          | Validación en el servidor                                          |
+| ------------ | ----------------------------------------------- | ------------------------------------------------------------------ |
+| `q`          | Buscador del menú (y un campo oculto del panel) | `isset`, `is_string` y `trim()`; máximo 60 caracteres              |
+| `talla[]`    | Casillas de talla                               | `FILTER_VALIDATE_INT` y debe estar en la lista de tallas (38 a 44) |
+| `marca[]`    | Casillas de marca                               | Debe ser una clave de la lista de marcas                           |
+| `origen[]`   | Casillas de origen                              | Debe ser una clave de la lista de orígenes                         |
+| `precio_max` | Deslizador de precio                            | `FILTER_VALIDATE_INT` con `min_range` 50000 y `max_range` 300000   |
+
+Reglas del filtrado:
+
+- Un valor inválido (una talla inventada, un precio fuera de rango, un dato que no es texto) **se ignora** y se muestra un aviso, sin romper la página.
+- Entre grupos de filtros se combinan con **Y** (Nike **y** Bolivia) y dentro de un grupo con **O** (Nike **o** Jordan).
+- Si un grupo no tiene nada marcado, no filtra. El botón **Limpiar** vuelve al catálogo sin filtros.
+
+Ejemplo de URL: `catalogo.php?marca[]=nike&marca[]=jordan&origen[]=chile&precio_max=250000`
+
+Filtros aplicados: los datos viajan en la URL, las casillas y el deslizador se conservan y el contador muestra la cantidad real de productos:
+
+![Catálogo con filtros por GET](clase5/docs/tp5-06-catalogo-filtros-get.png)
+
+Cuando ningún producto cumple los filtros, se muestra un mensaje con una salida:
+
+![Catálogo sin resultados](clase5/docs/tp5-07-catalogo-sin-resultados.png)
+
+Cuando llegan valores inválidos por la URL, se ignoran y se avisa:
+
+![Aviso por filtros inválidos](clase5/docs/tp5-08-catalogo-filtro-invalido.png)
+
+**Prueba de XSS en la búsqueda:** el texto buscado se muestra como texto, sin ejecutarse:
+
+![XSS en la búsqueda del catálogo](clase5/docs/tp5-09-xss-busqueda-catalogo.png)
+
+Búsqueda de texto desde el menú (por nombre, marca o tipo de producto):
+
+![Búsqueda desde el menú](clase5/docs/tp5-10-busqueda-menu-get.png)
+
+### Funciones auxiliares (`clase5/includes/funciones.php`)
+
+| Función                   | Qué hace                                                                                      |
+| ------------------------- | --------------------------------------------------------------------------------------------- |
+| `e($texto)`               | Escapa un valor para imprimirlo en HTML: `htmlspecialchars()` con `ENT_QUOTES` y UTF-8        |
+| `dato_post('campo')`      | Lee un campo de `$_POST`; devuelve `''` si no existe o no es texto, y aplica `trim()`         |
+| `dato_get('campo')`       | Lo mismo para `$_GET`                                                                         |
+| `dato_get_lista('campo')` | Lee un campo de `$_GET` con varios valores (`name="marca[]"`) y descarta los que no son texto |
+
 ## Diseño en Figma
 
 ![Diseño de la home en Figma](docs/diseno/Home.png)
@@ -188,6 +306,16 @@ ecommerce-zapatillas/
 ├── contacto.php
 ├── nosotros.php
 └── README.md
+├── clase5/                       # desarrollo del TP N° 5 (formularios y seguridad)
+│   ├── config/, css/, img/, js/  # copia de los recursos del TP N° 4
+│   ├── includes/
+│   │   ├── header.php, nav.php, footer.php   # plantillas del TP N° 4
+│   │   └── funciones.php         # e(), dato_post(), dato_get() y dato_get_lista()
+│   ├── docs/                     # capturas tp5-*.png
+│   ├── contacto.php              # formulario POST con validación
+│   ├── catalogo.php              # formulario GET: buscador y filtros
+│   └── (demás vistas del TP N° 4)
+└── README.md
 ```
 
 ## Cómo ejecutarlo localmente
@@ -228,6 +356,24 @@ Las vistas son archivos PHP, por lo que **no se pueden abrir con doble clic ni c
    npx prettier . --check
    ```
 
+### Ejecutar la Clase 5 (TP N° 5)
+
+El TP N° 5 vive en la carpeta `clase5/`, que tiene su propia copia de las plantillas y necesita su propio `.env`:
+
+1. Crear el `.env` de esa carpeta a partir de su plantilla:
+
+   ```bash
+   copy clase5\.env.example clase5\.env      # Windows
+   cp clase5/.env.example clase5/.env        # macOS / Linux
+   ```
+
+2. Con Apache encendido en XAMPP, abrir en el navegador:
+
+   ```
+   http://localhost/ecommerce-zapatillas/clase5/contacto.php    (formulario POST)
+   http://localhost/ecommerce-zapatillas/clase5/catalogo.php    (formulario GET)
+   ```
+
 ## Flujo de trabajo con Git
 
 ### TP N° 3
@@ -247,6 +393,13 @@ El proyecto se desarrolló con un flujo basado en ramas y Pull Request:
 2. Se agregó `.env` al `.gitignore` antes de crearlo, para que nunca llegue al repositorio.
 3. Se hicieron **commits atómicos**: uno para renombrar las vistas, uno para las variables de entorno, uno para las plantillas, uno por cada vista refactorizada, y otros para el menú, la seguridad y la documentación.
 4. Se subió la rama a GitHub y se abrió un Pull Request hacia `main`.
+
+### TP N° 5
+
+1. Se creó la rama `feature/formularios-seguridad` a partir de `main`.
+2. Se creó la carpeta `clase5/` con una copia del proyecto del TP N° 4 (sin versionar su `.env`) y todo el desarrollo se hizo dentro de ella.
+3. Se hicieron **commits atómicos**: uno para crear la carpeta, uno para las funciones auxiliares, tres para el formulario POST (HTML, validación y mensajes), varios para el formulario GET (productos en un arreglo, formulario de filtros, función para listas, filtrado, mensajes y persistencia) y otros para las capturas y la documentación.
+4. Se subió la rama a GitHub y se abrió un Pull Request hacia `main`, fusionado con **Create a merge commit** (sin squash) y sin borrar la rama.
 
 Los mensajes de commit siguen una convención de prefijos:
 
@@ -279,6 +432,10 @@ Los mensajes de commit siguen una convención de prefijos:
 - Los datos que se imprimen en pantalla se escapan con `htmlspecialchars()`, para que el navegador los trate como texto y no como código (prevención de **XSS**). Se aplica al título y la descripción de cada vista, al nombre y correo tomados de `.env`, y al término buscado en el catálogo.
 - El dato del buscador se valida antes de usarse: se comprueba que exista y sea texto, y se limpia con `trim()`.
 - Las variables de entorno quedan fuera del repositorio gracias al `.gitignore`.
+- Desde el TP N° 5, ningún dato de `$_POST` o `$_GET` se usa ni se imprime sin pasar antes por `trim()`, `filter_var()` o `e()` (que aplica `htmlspecialchars()` con `ENT_QUOTES` y UTF-8).
+- La validación que garantiza la seguridad está en el servidor: los atributos HTML5 (`required`, `type="email"`) solo mejoran la experiencia, y los formularios llevan `novalidate` para que el servidor reciba siempre el envío.
+- Se usan **listas blancas**: el asunto del contacto y los filtros del catálogo (tallas, marcas y origen) solo aceptan valores conocidos; lo demás se descarta.
+- Se probó XSS en el formulario de contacto (en el cuerpo de la página y dentro de un atributo `value`) y en la búsqueda del catálogo: el texto se muestra como texto y no se ejecuta.
 
 ## Auditoría Lighthouse
 
@@ -318,14 +475,16 @@ Para un proyecto con un diseño muy particular, que no se parezca a ningún fram
 
 ## Mejoras futuras
 
-- Procesar los formularios (contacto, login y registro) en PHP, con validación y saneamiento de los datos.
+- Procesar los formularios restantes (login, registro y checkout) en PHP, con la misma validación y saneamiento; el de contacto y los filtros del catálogo ya se procesan desde el TP N° 5.
 - Bloquear el acceso web al archivo `.env` (por ejemplo, con `.htaccess`) en un servidor real.
-- Hacer funcional el sitio con JavaScript: carrito, filtros y ordenamiento de productos.
+- Hacer funcional el sitio con JavaScript: carrito y ordenamiento de productos.
 - Conectar con una base de datos para productos, usuarios y pedidos.
 - Optimizar el peso de las imágenes para mejorar el rendimiento.
 - Crear las páginas pendientes del footer (envíos, cambios y devoluciones, preguntas frecuentes).
+- Enviar realmente el mensaje de contacto (por correo o guardándolo en una base de datos).
+- Agregar sesiones, control de acceso y un token CSRF en los formularios POST.
 
 ## Datos académicos
 
 Tecnicatura Superior en Análisis, Diseño y Desarrollo de Software – IES N° 6001, Salta, Argentina
-Materia: Programación Web – TP N° 3 y TP N° 4
+Materia: Programación Web – TP N° 3, TP N° 4 y TP N° 5
