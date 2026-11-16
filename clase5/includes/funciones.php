@@ -22,3 +22,14 @@ function dato_get(string $campo): string
 {
     return isset($_GET[$campo]) && is_string($_GET[$campo]) ? trim($_GET[$campo]) : '';
 }
+
+// Lee un campo de GET que puede traer varios valores (por ejemplo name="marca[]").
+// Devuelve una lista solo con los valores que son texto simple.
+// Si el campo no llega, o no es una lista, devuelve una lista vacía.
+function dato_get_lista(string $campo): array
+{
+    if (!isset($_GET[$campo]) || !is_array($_GET[$campo])) {
+        return [];
+    }
+    return array_values(array_filter($_GET[$campo], 'is_string'));
+} 
