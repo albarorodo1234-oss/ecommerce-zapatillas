@@ -1,15 +1,17 @@
 # SoleMate – Ecommerce de zapatillas importadas
 
-Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en dos etapas:
+Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en tres etapas:
 
 - **TP N° 3:** maquetación front-end en HTML5 semántico, CSS3 y Bootstrap, con Git Workflow, SEO y accesibilidad.
 - **TP N° 4:** _Migración a PHP, Modularización (SSI) y Renderizado Server-Side (SSR)_. Las 10 vistas pasaron de HTML estático a PHP, con plantillas reutilizables, título y menú dinámicos, y variables de entorno.
+- **TP N° 5:** _Procesamiento de formularios y seguridad web_. Formulario de contacto por POST y buscador con filtros del catálogo por GET, con sanitización, validación en el servidor, mensajes al usuario y prevención de XSS. Todo el desarrollo está en la carpeta [`clase5/`](clase5/).
 
 ## Enlaces
 
 - **Repositorio:** https://github.com/albarorodo1234-oss/ecommerce-zapatillas
 - **Prototipo en Figma:** [Ver el prototipo](https://www.figma.com/proto/jUfOsxLjA2Qn9kg3WJqB8j/Ecomerce-Zapatillas?node-id=2-3&p=f&t=eQLWJaIzpomdRZIH-1&scaling=scale-down-width&content-scaling=fixed&page-id=0%3A1)
 - **Informe de auditoría Lighthouse (TP N° 3):** [docs/auditoria-lighthouse.md](docs/auditoria-lighthouse.md)
+- **Desarrollo del TP N° 5:** [carpeta clase5/](clase5/) · [sección del README](#clase-5-procesamiento-de-formularios-y-seguridad-web-tp-n-5)
 
 > **Nota sobre la publicación:** en el TP N° 3 el sitio era HTML estático y se publicaba en GitHub Pages. Desde el TP N° 4 las vistas son `.php` y necesitan un servidor con PHP, que GitHub Pages no ofrece. Por eso el sitio se ejecuta en local con XAMPP (ver [Cómo ejecutarlo localmente](#cómo-ejecutarlo-localmente)).
 
@@ -304,6 +306,16 @@ ecommerce-zapatillas/
 ├── contacto.php
 ├── nosotros.php
 └── README.md
+├── clase5/                       # desarrollo del TP N° 5 (formularios y seguridad)
+│   ├── config/, css/, img/, js/  # copia de los recursos del TP N° 4
+│   ├── includes/
+│   │   ├── header.php, nav.php, footer.php   # plantillas del TP N° 4
+│   │   └── funciones.php         # e(), dato_post(), dato_get() y dato_get_lista()
+│   ├── docs/                     # capturas tp5-*.png
+│   ├── contacto.php              # formulario POST con validación
+│   ├── catalogo.php              # formulario GET: buscador y filtros
+│   └── (demás vistas del TP N° 4)
+└── README.md
 ```
 
 ## Cómo ejecutarlo localmente
@@ -344,6 +356,24 @@ Las vistas son archivos PHP, por lo que **no se pueden abrir con doble clic ni c
    npx prettier . --check
    ```
 
+### Ejecutar la Clase 5 (TP N° 5)
+
+El TP N° 5 vive en la carpeta `clase5/`, que tiene su propia copia de las plantillas y necesita su propio `.env`:
+
+1. Crear el `.env` de esa carpeta a partir de su plantilla:
+
+   ```bash
+   copy clase5\.env.example clase5\.env      # Windows
+   cp clase5/.env.example clase5/.env        # macOS / Linux
+   ```
+
+2. Con Apache encendido en XAMPP, abrir en el navegador:
+
+   ```
+   http://localhost/ecommerce-zapatillas/clase5/contacto.php    (formulario POST)
+   http://localhost/ecommerce-zapatillas/clase5/catalogo.php    (formulario GET)
+   ```
+
 ## Flujo de trabajo con Git
 
 ### TP N° 3
@@ -363,6 +393,13 @@ El proyecto se desarrolló con un flujo basado en ramas y Pull Request:
 2. Se agregó `.env` al `.gitignore` antes de crearlo, para que nunca llegue al repositorio.
 3. Se hicieron **commits atómicos**: uno para renombrar las vistas, uno para las variables de entorno, uno para las plantillas, uno por cada vista refactorizada, y otros para el menú, la seguridad y la documentación.
 4. Se subió la rama a GitHub y se abrió un Pull Request hacia `main`.
+
+### TP N° 5
+
+1. Se creó la rama `feature/formularios-seguridad` a partir de `main`.
+2. Se creó la carpeta `clase5/` con una copia del proyecto del TP N° 4 (sin versionar su `.env`) y todo el desarrollo se hizo dentro de ella.
+3. Se hicieron **commits atómicos**: uno para crear la carpeta, uno para las funciones auxiliares, tres para el formulario POST (HTML, validación y mensajes), varios para el formulario GET (productos en un arreglo, formulario de filtros, función para listas, filtrado, mensajes y persistencia) y otros para las capturas y la documentación.
+4. Se subió la rama a GitHub y se abrió un Pull Request hacia `main`, fusionado con **Create a merge commit** (sin squash) y sin borrar la rama.
 
 Los mensajes de commit siguen una convención de prefijos:
 
@@ -395,6 +432,10 @@ Los mensajes de commit siguen una convención de prefijos:
 - Los datos que se imprimen en pantalla se escapan con `htmlspecialchars()`, para que el navegador los trate como texto y no como código (prevención de **XSS**). Se aplica al título y la descripción de cada vista, al nombre y correo tomados de `.env`, y al término buscado en el catálogo.
 - El dato del buscador se valida antes de usarse: se comprueba que exista y sea texto, y se limpia con `trim()`.
 - Las variables de entorno quedan fuera del repositorio gracias al `.gitignore`.
+- Desde el TP N° 5, ningún dato de `$_POST` o `$_GET` se usa ni se imprime sin pasar antes por `trim()`, `filter_var()` o `e()` (que aplica `htmlspecialchars()` con `ENT_QUOTES` y UTF-8).
+- La validación que garantiza la seguridad está en el servidor: los atributos HTML5 (`required`, `type="email"`) solo mejoran la experiencia, y los formularios llevan `novalidate` para que el servidor reciba siempre el envío.
+- Se usan **listas blancas**: el asunto del contacto y los filtros del catálogo (tallas, marcas y origen) solo aceptan valores conocidos; lo demás se descarta.
+- Se probó XSS en el formulario de contacto (en el cuerpo de la página y dentro de un atributo `value`) y en la búsqueda del catálogo: el texto se muestra como texto y no se ejecuta.
 
 ## Auditoría Lighthouse
 
@@ -434,14 +475,16 @@ Para un proyecto con un diseño muy particular, que no se parezca a ningún fram
 
 ## Mejoras futuras
 
-- Procesar los formularios (contacto, login y registro) en PHP, con validación y saneamiento de los datos.
+- Procesar los formularios restantes (login, registro y checkout) en PHP, con la misma validación y saneamiento; el de contacto y los filtros del catálogo ya se procesan desde el TP N° 5.
 - Bloquear el acceso web al archivo `.env` (por ejemplo, con `.htaccess`) en un servidor real.
-- Hacer funcional el sitio con JavaScript: carrito, filtros y ordenamiento de productos.
+- Hacer funcional el sitio con JavaScript: carrito y ordenamiento de productos.
 - Conectar con una base de datos para productos, usuarios y pedidos.
 - Optimizar el peso de las imágenes para mejorar el rendimiento.
 - Crear las páginas pendientes del footer (envíos, cambios y devoluciones, preguntas frecuentes).
+- Enviar realmente el mensaje de contacto (por correo o guardándolo en una base de datos).
+- Agregar sesiones, control de acceso y un token CSRF en los formularios POST.
 
 ## Datos académicos
 
 Tecnicatura Superior en Análisis, Diseño y Desarrollo de Software – IES N° 6001, Salta, Argentina
-Materia: Programación Web – TP N° 3 y TP N° 4
+Materia: Programación Web – TP N° 3, TP N° 4 y TP N° 5
