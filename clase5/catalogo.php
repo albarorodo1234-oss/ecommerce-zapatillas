@@ -195,7 +195,7 @@ require_once 'includes/header.php';
                 <legend>Tallas</legend>
                 <div class="pill-group">
                   <?php foreach ($tallas_disponibles as $talla): ?>
-                    <input class="btn-check" type="checkbox" id="talla-<?= e($talla) ?>" name="talla[]" value="<?= e($talla) ?>" />
+                    <input class="btn-check" type="checkbox" id="talla-<?= e($talla) ?>" name="talla[]" value="<?= e($talla) ?>" <?= in_array($talla, $tallas_elegidas, true) ? 'checked' : '' ?> />
                     <label class="btn pill" for="talla-<?= e($talla) ?>"><?= e($talla) ?></label>
                   <?php endforeach; ?>
                 </div>
@@ -212,7 +212,7 @@ require_once 'includes/header.php';
                   min="<?= $precio_minimo ?>"
                   max="<?= $precio_maximo ?>"
                   step="<?= $precio_paso ?>"
-                  value="<?= $precio_maximo ?>"
+                  value="<?= e($precio_tope) ?>"
                 />
                 <div class="range-labels">
                   <span>ARS $<?= number_format($precio_minimo, 0, ',', '.') ?></span>
@@ -224,7 +224,7 @@ require_once 'includes/header.php';
                 <legend>Marcas</legend>
                 <div class="pill-group">
                   <?php foreach ($marcas_disponibles as $clave => $etiqueta): ?>
-                    <input class="btn-check" type="checkbox" id="marca-<?= e($clave) ?>" name="marca[]" value="<?= e($clave) ?>" />
+                    <input class="btn-check" type="checkbox" id="marca-<?= e($clave) ?>" name="marca[]" value="<?= e($clave) ?>" <?= in_array($clave, $marcas_elegidas, true) ? 'checked' : '' ?> />
                     <label class="btn pill" for="marca-<?= e($clave) ?>"><?= e($etiqueta) ?></label>
                   <?php endforeach; ?>
                 </div>
@@ -234,7 +234,7 @@ require_once 'includes/header.php';
                 <legend>Origen</legend>
                 <div class="pill-group">
                   <?php foreach ($origenes_disponibles as $clave => $etiqueta): ?>
-                    <input class="btn-check" type="checkbox" id="origen-<?= e($clave) ?>" name="origen[]" value="<?= e($clave) ?>" />
+                    <input class="btn-check" type="checkbox" id="origen-<?= e($clave) ?>" name="origen[]" value="<?= e($clave) ?>" <?= in_array($clave, $origenes_elegidos, true) ? 'checked' : '' ?> />
                     <label class="btn pill" for="origen-<?= e($clave) ?>"><?= e($etiqueta) ?></label>
                   <?php endforeach; ?>
                 </div>
