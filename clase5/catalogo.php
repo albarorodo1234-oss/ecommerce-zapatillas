@@ -154,7 +154,7 @@ require_once 'includes/header.php';
           <div>
             <h1 class="page-title">Catálogo de Productos</h1>
             <p class="results-count mb-0">
-             Mostrando 4 productos
+             Mostrando <?= count($productos_filtrados) ?> <?= count($productos_filtrados) === 1 ? 'producto' : 'productos' ?>
             <?php if ($busqueda !== ''): ?>
               · Buscaste: <strong><?= htmlspecialchars($busqueda) ?></strong>
             <?php endif; ?>
@@ -169,6 +169,17 @@ require_once 'includes/header.php';
             </select>
           </div>
         </div>
+
+                <?php if (!empty($errores_filtros)): ?>
+          <div class="alert alert-warning" role="alert">
+            <strong>Ajustamos tu búsqueda:</strong>
+            <ul class="mb-0">
+              <?php foreach ($errores_filtros as $aviso): ?>
+                <li><?= e($aviso) ?></li>
+              <?php endforeach; ?>
+            </ul>
+          </div>
+        <?php endif; ?>
 
         <div class="row g-4">
           <!-- Filtros -->
@@ -240,6 +251,12 @@ require_once 'includes/header.php';
           <!-- Listado de productos -->
           <section class="col-lg-9" aria-labelledby="listado-titulo">
             <h2 id="listado-titulo" class="visually-hidden">Listado de productos</h2>
+                      <?php if (empty($productos_filtrados)): ?>
+              <div class="alert alert-info" role="status">
+                No encontramos zapatillas con esos filtros. Probá con menos filtros o
+                <a href="catalogo.php" class="alert-link">limpiá la búsqueda</a>.
+              </div>
+            <?php endif; ?>
             <div class="row g-3">
               <?php foreach ($productos_filtrados as $producto): ?>
               <div class="col-12 col-sm-6 col-xl-3">
