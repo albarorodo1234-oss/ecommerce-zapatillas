@@ -115,6 +115,122 @@ Al buscar `<script>alert('XSS')</script>`, el catálogo muestra el texto tal cua
 
 ![Búsqueda con script escapado](docs/tp4-xss-catalogo.png)
 
+## Clase 5: Procesamiento de formularios y seguridad web (TP N° 5)
+
+Todo el desarrollo de este trabajo práctico está en la carpeta [`clase5/`](clase5/), que parte de una copia del proyecto del TP N° 4 e incorpora el procesamiento de formularios del lado del servidor, con sanitización y validación para prevenir **XSS** (_Cross-Site Scripting_).
+
+| Requisito de la consigna   | Cómo se resolvió                                                                                                                                                                                                                 |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Formulario por POST**    | `clase5/contacto.php`: formulario de contacto (nombre, correo, asunto y mensaje) que se envía y se procesa en la misma página.                                                                                                   |
+| **Formulario por GET**     | `clase5/catalogo.php`: buscador del menú y filtros del catálogo (tallas, precio máximo, marcas y origen), que filtran los productos de verdad.                                                                                   |
+| **Sanitización estricta**  | Todo dato de `$_POST` o `$_GET` pasa por `isset`, `is_string` y `trim()`; el correo, además, por `filter_var()` con `FILTER_SANITIZE_EMAIL`. Al imprimir se usa `e()`, que aplica `htmlspecialchars()` con `ENT_QUOTES` y UTF-8. |
+| **Validación en servidor** | Campos obligatorios no vacíos, formato de correo con `FILTER_VALIDATE_EMAIL`, largos mínimos y máximos, y valores permitidos mediante listas blancas.                                                                            |
+| **Mensajes al usuario**    | Aviso verde si el envío fue exitoso; aviso rojo y un texto bajo cada campo con error. En el catálogo: cantidad real de resultados, aviso si no hay coincidencias y aviso si se ignoró un filtro inválido.                        |
+| **Persistencia de datos**  | Si hay errores, el formulario conserva lo escrito. En el catálogo se mantienen las casillas marcadas, el deslizador de precio y la búsqueda.                                                                                     |
+
+### Formulario POST: contacto
+
+El formulario de [`clase5/contacto.php`](clase5/contacto.php) se envía por **POST** a la misma página, que lo procesa antes de dibujar el HTML. Lleva el atributo `novalidate` para que el navegador no bloquee el envío: los atributos `required` y `type="email"` quedan como ayuda de usabilidad, pero la validación que cuenta es la del servidor.
+
+| Campo     | Reglas en el servidor                                                                     |
+| --------- | ----------------------------------------------------------------------------------------- |
+| `nombre`  | Obligatorio; máximo 80 caracteres                                                         |
+| `email`   | Obligatorio; se sanea con `FILTER_SANITIZE_EMAIL` y se valida con `FILTER_VALIDATE_EMAIL` |
+| `asunto`  | Debe ser una de las 4 opciones permitidas (lista blanca comprobada con `in_array`)        |
+| `mensaje` | Obligatorio; entre 10 y 1000 caracteres                                                   |
+
+Extracto simplificado de la lógica:
+
+```php
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {            // solo si llegó por POST
+    $nombre = dato_post('nombre');                        // isset + is_string + trim
+    $email  = filter_var(dato_post('email'), FILTER_SANITIZE_EMAIL);
+
+    if ($nombre === '') {
+        $errores['nombre'] = 'El nombre es obligatorio.';
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errores['email'] = 'Ingresá un correo electrónico válido (por ejemplo, tu@email.com).';
+    }
+    // ... el asunto y el mensaje se validan de forma similar
+
+    if (empty($errores)) {
+        $exito = true;                                    // se muestra el aviso verde
+    }
+}
+```
+
+Los datos no se escapan al recibirlos sino **al imprimirlos** con `e()` (por ejemplo, `value="<?= e($datos['nombre']) ?>"`), para no mostrar mal un apóstrofo como en _D'Angelo_ y, a la vez, neutralizar cualquier etiqueta HTML.
+
+Con el formulario vacío se muestra un aviso general y un mensaje bajo cada campo:
+
+![Contacto con errores de validación](clase5/docs/tp5-01-contacto-errores.png)
+
+Con un correo inválido, solo ese campo marca error y los demás **conservan lo escrito**:
+
+![Contacto: persistencia de los datos](clase5/docs/tp5-02-contacto-persistencia.png)
+
+Con datos correctos, se muestra el aviso de éxito y el formulario queda vacío:
+
+![Contacto: envío exitoso](clase5/docs/tp5-03-contacto-exito.png)
+
+**Prueba de XSS en el cuerpo de la página:** al escribir `<script>alert('XSS')</script>` como nombre, el aviso lo muestra como texto y no se ejecuta nada:
+
+![XSS en el mensaje de éxito](clase5/docs/tp5-04-xss-mensaje-exito.png)
+
+**Prueba de XSS dentro de un atributo:** al escribir `"><img src=x onerror=alert(1)>` como nombre, el campo vuelve a mostrar ese texto literal y no se rompe el atributo `value`, porque `e()` usa `ENT_QUOTES`:
+
+![XSS en un atributo del formulario](clase5/docs/tp5-05-xss-atributo.png)
+
+### Formulario GET: buscador y filtros del catálogo
+
+El buscador del menú y el panel de filtros de [`clase5/catalogo.php`](clase5/catalogo.php) se envían por **GET**: los datos viajan en la URL, de modo que cada búsqueda se puede guardar en favoritos o compartir como enlace. Los 4 productos están en un arreglo PHP y se filtran en el servidor.
+
+| Parámetro    | Origen                                          | Validación en el servidor                                          |
+| ------------ | ----------------------------------------------- | ------------------------------------------------------------------ |
+| `q`          | Buscador del menú (y un campo oculto del panel) | `isset`, `is_string` y `trim()`; máximo 60 caracteres              |
+| `talla[]`    | Casillas de talla                               | `FILTER_VALIDATE_INT` y debe estar en la lista de tallas (38 a 44) |
+| `marca[]`    | Casillas de marca                               | Debe ser una clave de la lista de marcas                           |
+| `origen[]`   | Casillas de origen                              | Debe ser una clave de la lista de orígenes                         |
+| `precio_max` | Deslizador de precio                            | `FILTER_VALIDATE_INT` con `min_range` 50000 y `max_range` 300000   |
+
+Reglas del filtrado:
+
+- Un valor inválido (una talla inventada, un precio fuera de rango, un dato que no es texto) **se ignora** y se muestra un aviso, sin romper la página.
+- Entre grupos de filtros se combinan con **Y** (Nike **y** Bolivia) y dentro de un grupo con **O** (Nike **o** Jordan).
+- Si un grupo no tiene nada marcado, no filtra. El botón **Limpiar** vuelve al catálogo sin filtros.
+
+Ejemplo de URL: `catalogo.php?marca[]=nike&marca[]=jordan&origen[]=chile&precio_max=250000`
+
+Filtros aplicados: los datos viajan en la URL, las casillas y el deslizador se conservan y el contador muestra la cantidad real de productos:
+
+![Catálogo con filtros por GET](clase5/docs/tp5-06-catalogo-filtros-get.png)
+
+Cuando ningún producto cumple los filtros, se muestra un mensaje con una salida:
+
+![Catálogo sin resultados](clase5/docs/tp5-07-catalogo-sin-resultados.png)
+
+Cuando llegan valores inválidos por la URL, se ignoran y se avisa:
+
+![Aviso por filtros inválidos](clase5/docs/tp5-08-catalogo-filtro-invalido.png)
+
+**Prueba de XSS en la búsqueda:** el texto buscado se muestra como texto, sin ejecutarse:
+
+![XSS en la búsqueda del catálogo](clase5/docs/tp5-09-xss-busqueda-catalogo.png)
+
+Búsqueda de texto desde el menú (por nombre, marca o tipo de producto):
+
+![Búsqueda desde el menú](clase5/docs/tp5-10-busqueda-menu-get.png)
+
+### Funciones auxiliares (`clase5/includes/funciones.php`)
+
+| Función                   | Qué hace                                                                                      |
+| ------------------------- | --------------------------------------------------------------------------------------------- |
+| `e($texto)`               | Escapa un valor para imprimirlo en HTML: `htmlspecialchars()` con `ENT_QUOTES` y UTF-8        |
+| `dato_post('campo')`      | Lee un campo de `$_POST`; devuelve `''` si no existe o no es texto, y aplica `trim()`         |
+| `dato_get('campo')`       | Lo mismo para `$_GET`                                                                         |
+| `dato_get_lista('campo')` | Lee un campo de `$_GET` con varios valores (`name="marca[]"`) y descarta los que no son texto |
+
 ## Diseño en Figma
 
 ![Diseño de la home en Figma](docs/diseno/Home.png)
