@@ -1,0 +1,7 @@
+-- =====================================================================
+-- SoleMate · TP N° 6 · Parte 3: consultas de prueba CRUD (consultas.sql)
+-- Inserta datos de prueba y valida la estructura con SELECT, UPDATE
+-- y DELETE.
+-- Requisito: ejecutar antes schema.sql.
+-- Cómo ejecutarlo: phpMyAdmin > pestaña "Importar" > elegir este archivo.
+-- =====================================================================

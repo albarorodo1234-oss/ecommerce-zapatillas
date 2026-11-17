@@ -1,0 +1,7 @@
+-- =====================================================================
+-- SoleMate · TP N° 6 · Parte 2: script DDL (schema.sql)
+-- Crea la base de datos solemate_db con todas sus tablas, claves
+-- primarias, claves foráneas e índices.
+-- Motor probado: MariaDB 10.11.16 (XAMPP).
+-- Cómo ejecutarlo: phpMyAdmin > pestaña "Importar" > elegir este archivo.
+-- =====================================================================
