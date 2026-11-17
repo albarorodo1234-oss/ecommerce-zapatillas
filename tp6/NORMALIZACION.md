@@ -15,7 +15,7 @@ Para el ejemplo se toma la entidad principal del negocio: el **pedido**. Si Sole
 ### Problemas que presenta esta tabla
 
 - **Campo multivalorado:** la columna `productos` guarda **una lista** de artículos en una sola celda (el pedido 1001 tiene dos zapatillas). No se puede consultar ni sumar cada producto por separado.
-- **Campos no atómicos:** cada elemento de `productos` mezcla seis datos distintos (nombre, marca, categoría, origen, talle, cantidad y precio), y `direccion_envio` mezcla calle, ciudad y código postal.
+- **Campos no atómicos:** cada elemento de `productos` mezcla siete datos distintos (nombre, marca, categoría, origen, talle, cantidad y precio), y `direccion_envio` mezcla calle, ciudad y código postal.
 - **Redundancia:** los datos de Lucía (nombre, email, rol y dirección) se repiten en los pedidos 1001 y 1003, y los datos de cada producto (marca, categoría y origen) se repetirían en cada pedido que lo incluya.
 - **Anomalías que provoca:**
   - **De inserción:** no se puede registrar un producto nuevo del catálogo hasta que alguien lo compre.
