@@ -24,7 +24,25 @@ Para el ejemplo se toma la entidad principal del negocio: el **pedido**. Si Sole
 
 ## 2. Primera Forma Normal (1FN)
 
-_Pendiente._
+**Regla:** cada celda debe contener un único valor atómico, no puede haber grupos repetitivos y cada fila debe identificarse con una clave primaria.
+
+**Cambios aplicados:**
+
+- La lista de `productos` se separa en filas: el pedido 1001, que tenía dos zapatillas, ahora ocupa dos filas.
+- Cada producto se divide en columnas atómicas: `producto`, `marca`, `categoria`, `origen`, `talle`, `cantidad` y `precio_unitario`.
+- `direccion_envio` se divide en `direccion`, `ciudad` y `codigo_postal`.
+- El nombre del cliente se mantiene como un solo campo (nombre completo), porque así lo solicita el formulario de registro del sitio.
+
+| id_pedido | fecha      | cliente         | email_cliente   | rol_cliente | direccion         | ciudad                | codigo_postal | provincia | producto          | marca       | categoria  | origen  | talle | cantidad | precio_unitario | estado    | total  |
+| --------- | ---------- | --------------- | --------------- | ----------- | ----------------- | --------------------- | ------------- | --------- | ----------------- | ----------- | ---------- | ------- | ----- | -------- | --------------- | --------- | ------ |
+| 1001      | 2026-11-10 | Lucía Fernández | lucia@mail.com  | Cliente     | Av. Belgrano 1250 | Salta                 | 4400          | Salta     | Nike Air Max 270  | Nike        | Running    | Chile   | 38    | 1        | 189900          | Pendiente | 439800 |
+| 1001      | 2026-11-10 | Lucía Fernández | lucia@mail.com  | Cliente     | Av. Belgrano 1250 | Salta                 | 4400          | Salta     | Jordan 1 Retro    | Jordan      | Basketball | Chile   | 41    | 1        | 249900          | Pendiente | 439800 |
+| 1002      | 2026-11-12 | Martín Gómez    | martin@mail.com | Cliente     | San Martín 455    | San Miguel de Tucumán | 4000          | Tucumán   | Adidas Ultraboost | Adidas      | Running    | Bolivia | 40    | 2        | 219900          | Enviado   | 439800 |
+| 1003      | 2026-11-15 | Lucía Fernández | lucia@mail.com  | Cliente     | Av. Belgrano 1250 | Salta                 | 4400          | Salta     | New Balance 990   | New Balance | Lifestyle  | Bolivia | 42    | 1        | 229900          | Pendiente | 229900 |
+
+**Clave primaria compuesta:** (`id_pedido`, `producto`, `talle`). Se incluye el talle porque un mismo pedido podría contener la misma zapatilla en dos talles distintos.
+
+**Problema que persiste:** la tabla ya es atómica, pero aumentó la redundancia. Los datos del pedido 1001 (fecha, cliente, dirección, estado y total) se repiten en sus dos filas, porque dependen solo de `id_pedido` y no de la clave completa. Esto se resuelve en la 2FN.
 
 ## 3. Segunda Forma Normal (2FN)
 
