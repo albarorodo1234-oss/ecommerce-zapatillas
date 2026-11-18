@@ -46,7 +46,55 @@ Para el ejemplo se toma la entidad principal del negocio: el **pedido**. Si Sole
 
 ## 3. Segunda Forma Normal (2FN)
 
-_Pendiente._
+**Regla:** la tabla debe estar en 1FN y ninguna columna no clave puede depender solo de una parte de la clave primaria compuesta (sin dependencias parciales).
+
+**Análisis de dependencias** sobre la clave (`id_pedido`, `producto`, `talle`):
+
+| Columnas                                                                                                                   | Dependen de                                 | Tipo de dependencia |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------- |
+| `fecha`, `cliente`, `email_cliente`, `rol_cliente`, `direccion`, `ciudad`, `codigo_postal`, `provincia`, `estado`, `total` | solo `id_pedido`                            | Parcial             |
+| `marca`, `categoria`, `origen`, precio de lista                                                                            | solo `producto`                             | Parcial             |
+| `cantidad`, `precio_unitario`                                                                                              | la clave completa (pedido, producto, talle) | Total               |
+
+Las dependencias parciales se eliminan separando la tabla en tres. Además, a cada producto se le asigna un identificador numérico (`id_producto`) en lugar de usar su nombre como clave, porque el nombre puede cambiar.
+
+**Tabla `pedidos`** (PK: `id_pedido`)
+
+| id_pedido | fecha      | cliente         | email_cliente   | rol_cliente | direccion         | ciudad                | codigo_postal | provincia | estado    | total  |
+| --------- | ---------- | --------------- | --------------- | ----------- | ----------------- | --------------------- | ------------- | --------- | --------- | ------ |
+| 1001      | 2026-11-10 | Lucía Fernández | lucia@mail.com  | Cliente     | Av. Belgrano 1250 | Salta                 | 4400          | Salta     | Pendiente | 439800 |
+| 1002      | 2026-11-12 | Martín Gómez    | martin@mail.com | Cliente     | San Martín 455    | San Miguel de Tucumán | 4000          | Tucumán   | Enviado   | 439800 |
+| 1003      | 2026-11-15 | Lucía Fernández | lucia@mail.com  | Cliente     | Av. Belgrano 1250 | Salta                 | 4400          | Salta     | Pendiente | 229900 |
+
+**Tabla `productos`** (PK: `id_producto`)
+
+| id_producto | nombre            | marca       | categoria  | origen  | precio |
+| ----------- | ----------------- | ----------- | ---------- | ------- | ------ |
+| 1           | Nike Air Max 270  | Nike        | Running    | Chile   | 189900 |
+| 2           | Adidas Ultraboost | Adidas      | Running    | Bolivia | 219900 |
+| 3           | Jordan 1 Retro    | Jordan      | Basketball | Chile   | 249900 |
+| 4           | New Balance 990   | New Balance | Lifestyle  | Bolivia | 229900 |
+
+**Tabla `detalle_pedidos`** (PK compuesta: `id_pedido` + `id_producto` + `talle`; FK: `id_pedido` → `pedidos`, `id_producto` → `productos`)
+
+| id_pedido | id_producto | talle | cantidad | precio_unitario |
+| --------- | ----------- | ----- | -------- | --------------- |
+| 1001      | 1           | 38    | 1        | 189900          |
+| 1001      | 3           | 41    | 1        | 249900          |
+| 1002      | 2           | 40    | 2        | 219900          |
+| 1003      | 4           | 42    | 1        | 229900          |
+
+**Por qué hay dos precios:** `productos.precio` es el precio actual del catálogo y puede modificarse; `detalle_pedidos.precio_unitario` guarda el precio al que se vendió en ese pedido, para que un aumento posterior no altere los pedidos ya realizados.
+
+**Sobre `total`:** se podría calcular sumando `cantidad × precio_unitario` del detalle, pero se conserva en `pedidos` para consultar rápidamente el historial de compras sin recalcularlo cada vez.
+
+**Problemas que persisten:**
+
+- En `pedidos`, los datos de Lucía (nombre, rol) se repiten en los pedidos 1001 y 1003, porque dependen de su email y no del número de pedido.
+- En `pedidos`, la provincia depende de la ciudad, y el estado se escribe como texto libre en cada fila.
+- En `productos`, los nombres de marcas, categorías y orígenes se repiten como texto ("Running", "Chile"…), con riesgo de errores de tipeo.
+
+Estas dependencias transitivas se eliminan en la 3FN.
 
 ## 4. Tercera Forma Normal (3FN)
 
