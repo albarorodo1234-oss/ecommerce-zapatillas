@@ -819,7 +819,7 @@ h4 {
 @media (min-width: 992px) {
   .filters-sticky {
     position: sticky;
-    top: 90px;
+    top: 140px;
     height: auto;
   }
 }
@@ -991,7 +991,7 @@ h4 {
 @media (min-width: 992px) {
   .summary-sticky {
     position: sticky;
-    top: 90px;
+    top: 140px;
   }
 }
 
