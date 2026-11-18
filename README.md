@@ -233,6 +233,78 @@ Búsqueda de texto desde el menú (por nombre, marca o tipo de producto):
 | `dato_get('campo')`       | Lo mismo para `$_GET`                                                                         |
 | `dato_get_lista('campo')` | Lee un campo de `$_GET` con varios valores (`name="marca[]"`) y descarta los que no son texto |
 
+## Clase 6: Diseño y creación del esquema relacional en MySQL (TP N° 6)
+
+Todo el desarrollo de este trabajo práctico está en la carpeta [`tp6/`](tp6/): el diseño de la base de datos **`solemate_db`** del e-commerce, normalizada hasta la **3FN**, su script de creación y las consultas de prueba **CRUD**. Esta base es el insumo del TP N° 7, en el que el sitio se conectará a MySQL con PDO.
+
+| Requisito de la consigna    | Cómo se resolvió                                                                                                                                                                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Parte 1: normalización**  | [`tp6/NORMALIZACION.md`](tp6/NORMALIZACION.md): tabla de pedidos sin normalizar (lista de productos en una celda y datos del cliente repetidos), paso a paso por 1FN, 2FN y 3FN, listado final de tablas con PK y FK, y diagrama entidad-relación en Mermaid. |
+| **Parte 2: script DDL**     | [`tp6/schema.sql`](tp6/schema.sql): crea la base `solemate_db` (utf8mb4) con 11 tablas InnoDB, claves primarias `INT AUTO_INCREMENT`, 10 claves foráneas, campos de auditoría `created_at` y `updated_at`, y 2 índices explícitos.                            |
+| **Parte 3: consultas CRUD** | [`tp6/consultas.sql`](tp6/consultas.sql): inserta los datos reales del catálogo, consulta con `WHERE` + `ORDER BY` y con `INNER JOIN`, actualiza un precio y el estado de un pedido, y da de baja un producto de prueba.                                      |
+| **Prueba local**            | Ambos scripts se ejecutan sin errores en XAMPP (MariaDB 10.11), tanto desde phpMyAdmin como desde la terminal.                                                                                                                                                |
+
+### Tablas del esquema
+
+| Tipo                   | Tablas                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------ |
+| Usuarios               | `usuarios`: email único, contraseña cifrada con `password_hash()`, rol y datos personales  |
+| Maestras               | `roles`, `marcas`, `categorias`, `origenes`, `provincias` y `estados_pedido`               |
+| Principales de negocio | `productos` y `pedidos`                                                                    |
+| Relación / detalle     | `detalle_pedidos` (N:M entre pedidos y productos) y `producto_talle` (stock de cada talle) |
+
+Decisiones de diseño:
+
+- **Dos precios:** `productos.precio` es el precio actual del catálogo y `detalle_pedidos.precio_unitario` guarda el precio al que se vendió, para que un aumento no altere los pedidos ya realizados.
+- **Integridad referencial:** las claves foráneas usan `ON DELETE RESTRICT` (no se puede borrar una marca en uso ni un producto ya vendido), salvo el detalle de un pedido y el stock de un producto, que usan `ON DELETE CASCADE`.
+- **Combinaciones únicas:** `UNIQUE (pedido_id, producto_id, talle)` y `UNIQUE (producto_id, talle)` conservan la clave compuesta que surgió en la 2FN.
+- **Índices:** `idx_productos_precio` (filtro de precio máximo y orden por precio del catálogo) e `idx_pedidos_created_at` (historial de pedidos por fecha). No se indexaron `usuarios.email` ni las claves foráneas porque MySQL ya les crea un índice automático.
+- **Script reejecutable:** `schema.sql` empieza con `DROP DATABASE IF EXISTS`, así se puede ejecutar varias veces y funciona igual en MariaDB (XAMPP) y en MySQL 8.
+
+### Esquema en phpMyAdmin
+
+Importación de `schema.sql` sin errores:
+
+![Importación de schema.sql](tp6/docs/tp6-01-importacion-schema.png)
+
+Las 11 tablas de `solemate_db`, con motor InnoDB y cotejamiento `utf8mb4_unicode_ci`:
+
+![Tablas de la base solemate_db](tp6/docs/tp6-02-tablas.png)
+
+Estructura de `productos`, con sus tipos de datos y campos de auditoría:
+
+![Estructura de la tabla productos](tp6/docs/tp6-03-estructura-productos.png)
+
+Índices de `productos`: la clave primaria, las tres claves foráneas y el índice explícito sobre `precio`:
+
+![Índices de la tabla productos](tp6/docs/tp6-04-indices-productos.png)
+
+Relaciones entre las tablas en el Diseñador de phpMyAdmin (el diagrama entidad-relación completo está en [NORMALIZACION.md](tp6/NORMALIZACION.md)):
+
+![Diseñador de phpMyAdmin](tp6/docs/tp6-05-disenador.png)
+
+### Consultas CRUD
+
+Importación de `consultas.sql` sin errores:
+
+![Importación de consultas.sql](tp6/docs/tp6-06-importacion-consultas.png)
+
+**Read con `WHERE` y `ORDER BY`:** productos visibles de hasta $230.000, del más barato al más caro:
+
+![SELECT con WHERE y ORDER BY](tp6/docs/tp6-07-select-where-orderby.png)
+
+**Read con `INNER JOIN` de 6 tablas:** reconstruye los pedidos de la tabla sin normalizar a partir de las tablas normalizadas:
+
+![SELECT con INNER JOIN](tp6/docs/tp6-08-select-inner-join.png)
+
+**Update:** la Nike Air Max 270 sube a $199.900 en el catálogo, pero el pedido 1 conserva el precio al que se vendió:
+
+![Resultado del UPDATE de precio](tp6/docs/tp6-09-update-precio.png)
+
+**Delete:** el producto de prueba (id 5) se dio de baja y su stock se borró en cascada; quedan los 4 productos reales:
+
+![Productos después del UPDATE y el DELETE](tp6/docs/tp6-10-productos-tras-update-delete.png)
+
 ## Diseño en Figma
 
 ![Diseño de la home en Figma](docs/diseno/Home.png)
