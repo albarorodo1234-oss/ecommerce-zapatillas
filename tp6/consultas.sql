@@ -175,3 +175,57 @@ INNER JOIN estados_pedido  AS e  ON pe.estado_id    = e.id
 INNER JOIN detalle_pedidos AS d  ON d.pedido_id     = pe.id
 INNER JOIN productos       AS p  ON d.producto_id   = p.id
 ORDER BY pe.id ASC, p.nombre ASC;
+
+-- =====================================================================
+-- 3. UPDATE: actualización de registros (siempre con WHERE)
+-- =====================================================================
+
+-- 3.1 Cambio de precio: la Nike Air Max 270 (id 1) sube a $199.900.
+UPDATE productos
+SET precio = 199900.00
+WHERE id = 1;
+
+-- Comprobación: el catálogo muestra el precio nuevo, pero el pedido 1
+-- conserva el precio al que se vendió (precio_unitario).
+SELECT p.nombre,
+       p.precio          AS precio_actual,
+       d.pedido_id,
+       d.precio_unitario AS precio_vendido
+FROM productos AS p
+INNER JOIN detalle_pedidos AS d ON d.producto_id = p.id
+WHERE p.id = 1;
+
+-- 3.2 Cambio de estado: el pedido 1 pasa de Pendiente (1) a Pagado (2).
+UPDATE pedidos
+SET estado_id = 2
+WHERE id = 1;
+
+-- Comprobación: estado actual de cada pedido.
+SELECT pe.id    AS pedido,
+       e.nombre AS estado
+FROM pedidos AS pe
+INNER JOIN estados_pedido AS e ON pe.estado_id = e.id
+ORDER BY pe.id ASC;
+
+-- =====================================================================
+-- 4. DELETE: eliminación de registros (siempre con WHERE)
+-- =====================================================================
+
+-- Se crea un producto de prueba (recibe el id 5) con stock en dos
+-- talles, para darlo de baja sin afectar los datos del ejemplo.
+INSERT INTO productos (marca_id, categoria_id, origen_id, nombre, precio)
+VALUES (1, 1, 1, 'Producto de prueba', 1000.00);
+
+INSERT INTO producto_talle (producto_id, talle, stock) VALUES
+    (5, 40, 1),
+    (5, 41, 1);
+
+-- Baja del producto de prueba. Por el ON DELETE CASCADE de
+-- producto_talle, su stock se elimina automáticamente.
+DELETE FROM productos
+WHERE id = 5;
+
+-- Comprobación: quedan los 4 productos reales y ningún stock del id 5.
+SELECT (SELECT COUNT(*) FROM productos)                          AS productos,
+       (SELECT COUNT(*) FROM producto_talle WHERE producto_id = 5) AS stock_producto_5;
+
