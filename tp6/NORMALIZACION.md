@@ -181,4 +181,125 @@ Estas dependencias transitivas se eliminan en la 3FN.
 
 ## 5. Tablas resultantes (PK y FK)
 
-_Pendiente._
+Esquema final de la base de datos `solemate_db`. Se siguen las convenciones de la cátedra: tablas y columnas en `snake_case`, clave primaria `id` en cada tabla y claves foráneas con el formato `nombre_tabla_id`.
+
+| Tabla             | Tipo                                        | PK   | FK                                                                                                | Otras columnas                                                                                  |
+| ----------------- | ------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `roles`           | Maestra                                     | `id` | —                                                                                                 | `nombre` (único)                                                                                |
+| `provincias`      | Maestra                                     | `id` | —                                                                                                 | `nombre` (único)                                                                                |
+| `estados_pedido`  | Maestra                                     | `id` | —                                                                                                 | `nombre` (único)                                                                                |
+| `marcas`          | Maestra                                     | `id` | —                                                                                                 | `nombre` (único)                                                                                |
+| `categorias`      | Maestra                                     | `id` | —                                                                                                 | `nombre` (único)                                                                                |
+| `origenes`        | Maestra                                     | `id` | —                                                                                                 | `nombre` (único)                                                                                |
+| `usuarios`        | Usuarios (autenticación)                    | `id` | `rol_id` → `roles.id`                                                                             | `nombre`, `email` (único), `password_hash`, `telefono`, `created_at`, `updated_at`              |
+| `productos`       | Principal de negocio                        | `id` | `marca_id` → `marcas.id`, `categoria_id` → `categorias.id`, `origen_id` → `origenes.id`           | `nombre`, `descripcion`, `precio`, `imagen`, `alt`, `activo`, `created_at`, `updated_at`        |
+| `pedidos`         | Principal de negocio                        | `id` | `usuario_id` → `usuarios.id`, `provincia_id` → `provincias.id`, `estado_id` → `estados_pedido.id` | `direccion`, `ciudad`, `codigo_postal`, `total`, `created_at`, `updated_at`                     |
+| `detalle_pedidos` | Relación N:M (pedidos ↔ productos)          | `id` | `pedido_id` → `pedidos.id`, `producto_id` → `productos.id`                                        | `talle`, `cantidad`, `precio_unitario`; combinación única (`pedido_id`, `producto_id`, `talle`) |
+| `producto_talle`  | Relación (stock de cada producto por talle) | `id` | `producto_id` → `productos.id`                                                                    | `talle`, `stock`; combinación única (`producto_id`, `talle`)                                    |
+
+**Notas de diseño:**
+
+- **Claves primarias:** todas las tablas usan `id INT AUTO_INCREMENT PRIMARY KEY`. En las tablas de relación, la clave compuesta que surgió en la 2FN se conserva como restricción `UNIQUE`, para que no se repita la misma combinación.
+- **Autenticación:** `usuarios.password_hash` guarda la contraseña cifrada (nunca en texto plano) y `email` es único, porque se usa para iniciar sesión.
+- **Fecha del pedido:** se toma de `pedidos.created_at`, que MySQL completa automáticamente al crear el registro.
+- **Talles:** se guardan como número en `detalle_pedidos` y `producto_talle`, sin tabla propia, porque un talle no tiene otros atributos.
+- **Productos visibles:** `productos.activo` (1 = visible, 0 = oculto) permite retirar un producto del catálogo sin borrarlo.
+- **Auditoría:** las tablas principales (`usuarios`, `productos` y `pedidos`) tienen `created_at` y `updated_at`.
+
+**Relaciones:**
+
+- `roles` 1:N `usuarios` · `usuarios` 1:N `pedidos` · `provincias` 1:N `pedidos` · `estados_pedido` 1:N `pedidos`
+- `marcas` 1:N `productos` · `categorias` 1:N `productos` · `origenes` 1:N `productos`
+- `pedidos` N:M `productos`, resuelta con la tabla `detalle_pedidos`
+- `productos` 1:N `producto_talle`
+
+### Diagrama entidad-relación
+
+```mermaid
+erDiagram
+    roles ||--o{ usuarios : "asigna"
+    usuarios ||--o{ pedidos : "realiza"
+    provincias ||--o{ pedidos : "destino de"
+    estados_pedido ||--o{ pedidos : "estado de"
+    marcas ||--o{ productos : "marca de"
+    categorias ||--o{ productos : "agrupa"
+    origenes ||--o{ productos : "origen de"
+    pedidos ||--|{ detalle_pedidos : "contiene"
+    productos ||--o{ detalle_pedidos : "vendido en"
+    productos ||--o{ producto_talle : "stock por talle"
+
+    roles {
+        int id PK
+        varchar nombre UK
+    }
+    provincias {
+        int id PK
+        varchar nombre UK
+    }
+    estados_pedido {
+        int id PK
+        varchar nombre UK
+    }
+    marcas {
+        int id PK
+        varchar nombre UK
+    }
+    categorias {
+        int id PK
+        varchar nombre UK
+    }
+    origenes {
+        int id PK
+        varchar nombre UK
+    }
+    usuarios {
+        int id PK
+        int rol_id FK
+        varchar nombre
+        varchar email UK
+        varchar password_hash
+        varchar telefono
+        timestamp created_at
+        timestamp updated_at
+    }
+    productos {
+        int id PK
+        int marca_id FK
+        int categoria_id FK
+        int origen_id FK
+        varchar nombre
+        text descripcion
+        decimal precio
+        varchar imagen
+        varchar alt
+        tinyint activo
+        timestamp created_at
+        timestamp updated_at
+    }
+    pedidos {
+        int id PK
+        int usuario_id FK
+        int provincia_id FK
+        int estado_id FK
+        varchar direccion
+        varchar ciudad
+        varchar codigo_postal
+        decimal total
+        timestamp created_at
+        timestamp updated_at
+    }
+    detalle_pedidos {
+        int id PK
+        int pedido_id FK
+        int producto_id FK
+        tinyint talle
+        int cantidad
+        decimal precio_unitario
+    }
+    producto_talle {
+        int id PK
+        int producto_id FK
+        tinyint talle
+        int stock
+    }
+```
