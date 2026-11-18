@@ -170,3 +170,18 @@ CREATE TABLE IF NOT EXISTS producto_talle (
         ON DELETE CASCADE
 ) ENGINE = InnoDB;
 
+-- ---------------------------------------------------------------------
+-- 5. Índices
+-- ---------------------------------------------------------------------
+-- MySQL ya crea índices automáticos para cada PRIMARY KEY, cada UNIQUE
+-- (por ejemplo usuarios.email) y cada clave foránea (por ejemplo
+-- productos.categoria_id). Crear otro índice sobre esas columnas sería
+-- un duplicado, por eso se indexan columnas que todavía no tienen índice
+-- y que el sitio filtra u ordena con frecuencia.
+
+-- El catálogo filtra por precio máximo y ordena por precio
+-- (menor / mayor precio).
+CREATE INDEX idx_productos_precio ON productos (precio);
+
+-- El historial de pedidos se ordena y se filtra por fecha.
+CREATE INDEX idx_pedidos_created_at ON pedidos (created_at);
