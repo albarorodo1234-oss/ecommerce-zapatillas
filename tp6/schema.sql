@@ -103,3 +103,65 @@ CREATE TABLE IF NOT EXISTS productos (
         FOREIGN KEY (origen_id) REFERENCES origenes (id)
         ON DELETE RESTRICT
 ) ENGINE = InnoDB;
+
+-- ---------------------------------------------------------------------
+-- 4. Pedidos y tablas de relación
+-- ---------------------------------------------------------------------
+
+-- Pedidos de los clientes. La fecha del pedido es created_at.
+-- La dirección de envío se guarda en cada pedido (puede cambiar
+-- de una compra a otra).
+CREATE TABLE IF NOT EXISTS pedidos (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id    INT NOT NULL,
+    provincia_id  INT NOT NULL,
+    estado_id     INT NOT NULL,
+    direccion     VARCHAR(150) NOT NULL,
+    ciudad        VARCHAR(100) NOT NULL,
+    codigo_postal VARCHAR(10) NOT NULL,
+    total         DECIMAL(10, 2) NOT NULL,
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_pedidos_usuarios
+        FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_pedidos_provincias
+        FOREIGN KEY (provincia_id) REFERENCES provincias (id)
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_pedidos_estados
+        FOREIGN KEY (estado_id) REFERENCES estados_pedido (id)
+        ON DELETE RESTRICT
+) ENGINE = InnoDB;
+
+-- Detalle de cada pedido: relación N:M entre pedidos y productos.
+-- precio_unitario guarda el precio al momento de la venta.
+CREATE TABLE IF NOT EXISTS detalle_pedidos (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    pedido_id       INT NOT NULL,
+    producto_id     INT NOT NULL,
+    talle           TINYINT UNSIGNED NOT NULL,
+    cantidad        INT UNSIGNED NOT NULL,
+    precio_unitario DECIMAL(10, 2) NOT NULL,
+    CONSTRAINT uq_detalle_pedido_producto_talle
+        UNIQUE (pedido_id, producto_id, talle),
+    CONSTRAINT fk_detalle_pedidos
+        FOREIGN KEY (pedido_id) REFERENCES pedidos (id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_detalle_productos
+        FOREIGN KEY (producto_id) REFERENCES productos (id)
+        ON DELETE RESTRICT
+) ENGINE = InnoDB;
+
+-- Stock de cada producto en cada talle.
+CREATE TABLE IF NOT EXISTS producto_talle (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    producto_id INT NOT NULL,
+    talle       TINYINT UNSIGNED NOT NULL,
+    stock       INT UNSIGNED NOT NULL DEFAULT 0,
+    CONSTRAINT uq_producto_talle
+        UNIQUE (producto_id, talle),
+    CONSTRAINT fk_producto_talle_productos
+        FOREIGN KEY (producto_id) REFERENCES productos (id)
+        ON DELETE CASCADE
+) ENGINE = InnoDB;
+
