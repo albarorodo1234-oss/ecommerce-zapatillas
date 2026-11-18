@@ -91,7 +91,7 @@ Las dependencias parciales se eliminan separando la tabla en tres. Además, a ca
 **Problemas que persisten:**
 
 - En `pedidos`, los datos de Lucía (nombre, rol) se repiten en los pedidos 1001 y 1003, porque dependen de su email y no del número de pedido.
-- En `pedidos`, la provincia depende de la ciudad, y el estado se escribe como texto libre en cada fila.
+- En `pedidos`, la provincia y el estado se escriben como texto en cada fila, aunque solo pueden tomar valores de una lista fija (las provincias del checkout y los estados posibles de un pedido).
 - En `productos`, los nombres de marcas, categorías y orígenes se repiten como texto ("Running", "Chile"…), con riesgo de errores de tipeo.
 
 Estas dependencias transitivas se eliminan en la 3FN.
