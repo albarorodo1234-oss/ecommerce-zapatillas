@@ -124,3 +124,54 @@ INSERT INTO detalle_pedidos (pedido_id, producto_id, talle, cantidad, precio_uni
     (1, 3, 41, 1, 249900.00),
     (2, 2, 40, 2, 219900.00),
     (3, 4, 42, 1, 229900.00);
+
+-- =====================================================================
+-- 2. READ: consultas de lectura
+-- =====================================================================
+
+-- 2.1 SELECT con WHERE y ORDER BY.
+-- Productos visibles con precio de hasta $230.000, del más barato al
+-- más caro (igual que el filtro de precio máximo y el orden "Menor
+-- precio" del catálogo). Usa el índice idx_productos_precio.
+SELECT id, nombre, precio
+FROM productos
+WHERE activo = 1
+  AND precio <= 230000
+ORDER BY precio ASC;
+
+-- 2.2 SELECT con INNER JOIN (4 tablas).
+-- Catálogo completo con los nombres de marca, categoría y origen en
+-- lugar de sus id, ordenado por marca y por nombre del producto.
+SELECT p.nombre AS producto,
+       m.nombre AS marca,
+       c.nombre AS categoria,
+       o.nombre AS origen,
+       p.precio
+FROM productos AS p
+INNER JOIN marcas     AS m ON p.marca_id     = m.id
+INNER JOIN categorias AS c ON p.categoria_id = c.id
+INNER JOIN origenes   AS o ON p.origen_id    = o.id
+WHERE p.activo = 1
+ORDER BY m.nombre ASC, p.nombre ASC;
+
+-- 2.3 SELECT con INNER JOIN (6 tablas).
+-- Reconstruye los pedidos tal como se veían en la tabla sin normalizar
+-- de NORMALIZACION.md: cliente, provincia, estado y cada producto
+-- comprado, con su subtotal (cantidad x precio unitario).
+SELECT pe.id                           AS pedido,
+       DATE(pe.created_at)             AS fecha,
+       u.nombre                        AS cliente,
+       pr.nombre                       AS provincia,
+       e.nombre                        AS estado,
+       p.nombre                        AS producto,
+       d.talle,
+       d.cantidad,
+       d.precio_unitario,
+       d.cantidad * d.precio_unitario  AS subtotal
+FROM pedidos AS pe
+INNER JOIN usuarios        AS u  ON pe.usuario_id   = u.id
+INNER JOIN provincias      AS pr ON pe.provincia_id = pr.id
+INNER JOIN estados_pedido  AS e  ON pe.estado_id    = e.id
+INNER JOIN detalle_pedidos AS d  ON d.pedido_id     = pe.id
+INNER JOIN productos       AS p  ON d.producto_id   = p.id
+ORDER BY pe.id ASC, p.nombre ASC;
