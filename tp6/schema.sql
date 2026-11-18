@@ -57,3 +57,49 @@ CREATE TABLE IF NOT EXISTS origenes (
     id     INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE
 ) ENGINE = InnoDB;
+
+-- ---------------------------------------------------------------------
+-- 3. Usuarios y productos
+-- ---------------------------------------------------------------------
+
+-- Usuarios del sitio: datos de acceso (email y contraseña cifrada),
+-- rol y datos personales.
+CREATE TABLE IF NOT EXISTS usuarios (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    rol_id        INT NOT NULL,
+    nombre        VARCHAR(100) NOT NULL,
+    email         VARCHAR(150) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    telefono      VARCHAR(30) NULL,
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_usuarios_roles
+        FOREIGN KEY (rol_id) REFERENCES roles (id)
+        ON DELETE RESTRICT
+) ENGINE = InnoDB;
+
+-- Productos del catálogo (las columnas coinciden con el arreglo
+-- $productos de catalogo.php, para reemplazarlo en el TP7).
+CREATE TABLE IF NOT EXISTS productos (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    marca_id     INT NOT NULL,
+    categoria_id INT NOT NULL,
+    origen_id    INT NOT NULL,
+    nombre       VARCHAR(100) NOT NULL,
+    descripcion  TEXT NULL,
+    precio       DECIMAL(10, 2) NOT NULL,
+    imagen       VARCHAR(255) NULL,
+    alt          VARCHAR(255) NULL,
+    activo       TINYINT(1) NOT NULL DEFAULT 1,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_productos_marcas
+        FOREIGN KEY (marca_id) REFERENCES marcas (id)
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_productos_categorias
+        FOREIGN KEY (categoria_id) REFERENCES categorias (id)
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_productos_origenes
+        FOREIGN KEY (origen_id) REFERENCES origenes (id)
+        ON DELETE RESTRICT
+) ENGINE = InnoDB;
