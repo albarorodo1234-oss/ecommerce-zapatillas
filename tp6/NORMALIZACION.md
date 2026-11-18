@@ -98,7 +98,86 @@ Estas dependencias transitivas se eliminan en la 3FN.
 
 ## 4. Tercera Forma Normal (3FN)
 
-_Pendiente._
+**Regla:** la tabla debe estar en 2FN y ninguna columna no clave puede depender de otra columna no clave (sin dependencias transitivas).
+
+**Dependencia transitiva detectada:** en `pedidos`, `id_pedido → email_cliente → cliente, rol_cliente`. El nombre y el rol no dependen del pedido sino del cliente; por eso los datos de Lucía se repetían en los pedidos 1001 y 1003. Se extraen a la tabla `usuarios` y `pedidos` conserva solo la clave foránea `id_usuario`.
+
+**Tablas maestras:** los datos de otras entidades que se repetían como texto (rol, provincia, estado, marca, categoría y origen) se extraen a sus propias tablas, y las tablas que los usaban guardan solo la clave foránea. Así cada valor se escribe una sola vez y no se pueden cargar valores inexistentes o mal escritos.
+
+**Decisión de diseño:** la dirección de envío (`direccion`, `ciudad`, `codigo_postal`, `id_provincia`) se mantiene en `pedidos`, porque pertenece a cada compra: un mismo cliente puede enviar pedidos a distintas direcciones. La ciudad se conserva como texto porque en el checkout se escribe libremente.
+
+**Tabla `roles`** (PK: `id_rol`)
+
+| id_rol | nombre        |
+| ------ | ------------- |
+| 1      | Administrador |
+| 2      | Cliente       |
+
+**Tabla `usuarios`** (PK: `id_usuario`; FK: `id_rol` → `roles`)
+
+| id_usuario | nombre          | email           | id_rol |
+| ---------- | --------------- | --------------- | ------ |
+| 1          | Lucía Fernández | lucia@mail.com  | 2      |
+| 2          | Martín Gómez    | martin@mail.com | 2      |
+
+**Tabla `provincias`** (PK: `id_provincia`)
+
+| id_provincia | nombre  |
+| ------------ | ------- |
+| 1            | Salta   |
+| 2            | Tucumán |
+
+**Tabla `estados_pedido`** (PK: `id_estado`)
+
+| id_estado | nombre    |
+| --------- | --------- |
+| 1         | Pendiente |
+| 2         | Enviado   |
+
+**Tabla `pedidos`** (PK: `id_pedido`; FK: `id_usuario` → `usuarios`, `id_provincia` → `provincias`, `id_estado` → `estados_pedido`)
+
+| id_pedido | fecha      | id_usuario | direccion         | ciudad                | codigo_postal | id_provincia | id_estado | total  |
+| --------- | ---------- | ---------- | ----------------- | --------------------- | ------------- | ------------ | --------- | ------ |
+| 1001      | 2026-11-10 | 1          | Av. Belgrano 1250 | Salta                 | 4400          | 1            | 1         | 439800 |
+| 1002      | 2026-11-12 | 2          | San Martín 455    | San Miguel de Tucumán | 4000          | 2            | 2         | 439800 |
+| 1003      | 2026-11-15 | 1          | Av. Belgrano 1250 | Salta                 | 4400          | 1            | 1         | 229900 |
+
+**Tabla `marcas`** (PK: `id_marca`)
+
+| id_marca | nombre      |
+| -------- | ----------- |
+| 1        | Nike        |
+| 2        | Adidas      |
+| 3        | Jordan      |
+| 4        | New Balance |
+
+**Tabla `categorias`** (PK: `id_categoria`)
+
+| id_categoria | nombre     |
+| ------------ | ---------- |
+| 1            | Running    |
+| 2            | Basketball |
+| 3            | Lifestyle  |
+
+**Tabla `origenes`** (PK: `id_origen`)
+
+| id_origen | nombre  |
+| --------- | ------- |
+| 1         | Chile   |
+| 2         | Bolivia |
+
+**Tabla `productos`** (PK: `id_producto`; FK: `id_marca` → `marcas`, `id_categoria` → `categorias`, `id_origen` → `origenes`)
+
+| id_producto | nombre            | id_marca | id_categoria | id_origen | precio |
+| ----------- | ----------------- | -------- | ------------ | --------- | ------ |
+| 1           | Nike Air Max 270  | 1        | 1            | 1         | 189900 |
+| 2           | Adidas Ultraboost | 2        | 1            | 2         | 219900 |
+| 3           | Jordan 1 Retro    | 3        | 2            | 1         | 249900 |
+| 4           | New Balance 990   | 4        | 3            | 2         | 229900 |
+
+**Tabla `detalle_pedidos`:** no cambia respecto de la 2FN, porque `cantidad` y `precio_unitario` ya dependen solo de su clave completa.
+
+**Resultado:** cada dato se guarda una sola vez. Si Lucía cambia su email, se modifica una única fila de `usuarios`; si se borra un pedido, los productos y los clientes siguen existiendo; y se pueden cargar productos nuevos aunque nadie los haya comprado todavía.
 
 ## 5. Tablas resultantes (PK y FK)
 
