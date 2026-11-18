@@ -12,7 +12,7 @@
 -- ATENCIÓN: borra la base completa (si existe) y la vuelve a crear
 -- desde cero. Así el script se puede ejecutar varias veces sin errores,
 -- tanto en MariaDB (XAMPP) como en MySQL 8 (Laragon).
-DROP DATABASE IF EXISTS solemate_db; 
+DROP DATABASE IF EXISTS solemate_db;
 
 -- utf8mb4: admite tildes, eñes y cualquier carácter Unicode.
 -- utf8mb4_unicode_ci: compara textos sin distinguir mayúsculas de minúsculas.
@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS detalle_pedidos (
         ON DELETE RESTRICT
 ) ENGINE = InnoDB;
 
--- Stock de cada producto en cada talle.  
+-- Stock de cada producto en cada talle.
 CREATE TABLE IF NOT EXISTS producto_talle (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     producto_id INT NOT NULL,
