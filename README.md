@@ -1,10 +1,12 @@
 # SoleMate – Ecommerce de zapatillas importadas
 
-Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en tres etapas:
+Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en cuatro etapas:
 
 - **TP N° 3:** maquetación front-end en HTML5 semántico, CSS3 y Bootstrap, con Git Workflow, SEO y accesibilidad.
 - **TP N° 4:** _Migración a PHP, Modularización (SSI) y Renderizado Server-Side (SSR)_. Las 10 vistas pasaron de HTML estático a PHP, con plantillas reutilizables, título y menú dinámicos, y variables de entorno.
-- **TP N° 5:** _Procesamiento de formularios y seguridad web_. Formulario de contacto por POST y buscador con filtros del catálogo por GET, con sanitización, validación en el servidor, mensajes al usuario y prevención de XSS. Todo el desarrollo está en la carpeta [`clase5/`](clase5/).
+- **TP N° 5:** _Procesamiento de formularios y seguridad web_. Formulario de contacto por POST y buscador con filtros del catálogo por GET, con sanitización, validación en el servidor, mensajes al usuario y prevención de XSS. Todo el desarrollo está en la carpeta
+- **TP N° 6:** _Diseño y creación del esquema relacional en MySQL_. Base de datos `solemate_db` normalizada hasta la 3FN, con su script de creación (`schema.sql`) y consultas de prueba CRUD (`consultas.sql`). Todo el desarrollo está en la carpeta [`tp6/`](tp6/).
+  [`clase5/`](clase5/).
 
 ## Enlaces
 
@@ -12,6 +14,7 @@ Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y
 - **Prototipo en Figma:** [Ver el prototipo](https://www.figma.com/proto/jUfOsxLjA2Qn9kg3WJqB8j/Ecomerce-Zapatillas?node-id=2-3&p=f&t=eQLWJaIzpomdRZIH-1&scaling=scale-down-width&content-scaling=fixed&page-id=0%3A1)
 - **Informe de auditoría Lighthouse (TP N° 3):** [docs/auditoria-lighthouse.md](docs/auditoria-lighthouse.md)
 - **Desarrollo del TP N° 5:** [carpeta clase5/](clase5/) · [sección del README](#clase-5-procesamiento-de-formularios-y-seguridad-web-tp-n-5)
+- **Desarrollo del TP N° 6:** [carpeta tp6/](tp6/) · [normalización](tp6/NORMALIZACION.md) · [sección del README](#clase-6-diseño-y-creación-del-esquema-relacional-en-mysql-tp-n-6)
 
 > **Nota sobre la publicación:** en el TP N° 3 el sitio era HTML estático y se publicaba en GitHub Pages. Desde el TP N° 4 las vistas son `.php` y necesitan un servidor con PHP, que GitHub Pages no ofrece. Por eso el sitio se ejecuta en local con XAMPP (ver [Cómo ejecutarlo localmente](#cómo-ejecutarlo-localmente)).
 
@@ -335,6 +338,7 @@ El naranja del diseño original (`#FF4D00`) no alcanza el contraste mínimo de 4
 - JavaScript (archivo base `js/main.js`)
 - **PHP 8** (includes con `require_once`, variables, constantes y `htmlspecialchars()`)
 - **XAMPP** (servidor Apache con PHP para desarrollo local)
+- **MySQL / MariaDB 10.11** y **phpMyAdmin** (base de datos relacional, desde el TP N° 6)
 - Variables de entorno con archivo `.env`
 - Google Fonts (Poppins e Inter)
 - Prettier (formateo de código)
@@ -387,6 +391,11 @@ ecommerce-zapatillas/
 │   ├── contacto.php              # formulario POST con validación
 │   ├── catalogo.php              # formulario GET: buscador y filtros
 │   └── (demás vistas del TP N° 4)
+├── tp6/                          # desarrollo del TP N° 6 (base de datos MySQL)
+│   ├── NORMALIZACION.md          # Parte 1: normalización (1FN a 3FN) y diagrama
+│   ├── schema.sql                # Parte 2: script DDL (base, tablas, FK e índices)
+│   ├── consultas.sql             # Parte 3: consultas CRUD de prueba
+│   └── docs/                     # capturas tp6-*.png
 └── README.md
 ```
 
@@ -446,6 +455,23 @@ El TP N° 5 vive en la carpeta `clase5/`, que tiene su propia copia de las plant
    http://localhost/ecommerce-zapatillas/clase5/catalogo.php    (formulario GET)
    ```
 
+### Ejecutar el TP N° 6 (base de datos)
+
+1. En el Panel de Control de XAMPP, presionar **Start** en **Apache** y en **MySQL**.
+2. Entrar a `http://localhost/phpmyadmin`, abrir la pestaña **Importar** (sin ninguna base seleccionada) e importar `tp6/schema.sql`.
+3. Seleccionar la base `solemate_db` e importar `tp6/consultas.sql`.
+
+También se pueden ejecutar desde la terminal (PowerShell, en la carpeta del proyecto):
+
+```powershell
+& "C:\xampp\mysql\bin\mysql.exe" -u root --default-character-set=utf8mb4 -e "source tp6/schema.sql"
+& "C:\xampp\mysql\bin\mysql.exe" -u root --default-character-set=utf8mb4 -e "source tp6/consultas.sql"
+```
+
+> **Importante:** `schema.sql` borra y vuelve a crear la base `solemate_db`, así que el orden es siempre primero `schema.sql` y después `consultas.sql`.
+
+Los usuarios de prueba (`admin@solemate.com`, `lucia@mail.com` y `martin@mail.com`) tienen la contraseña `SoleMate2026`, guardada cifrada con `password_hash()`.
+
 ## Flujo de trabajo con Git
 
 ### TP N° 3
@@ -472,6 +498,14 @@ El proyecto se desarrolló con un flujo basado en ramas y Pull Request:
 2. Se creó la carpeta `clase5/` con una copia del proyecto del TP N° 4 (sin versionar su `.env`) y todo el desarrollo se hizo dentro de ella.
 3. Se hicieron **commits atómicos**: uno para crear la carpeta, uno para las funciones auxiliares, tres para el formulario POST (HTML, validación y mensajes), varios para el formulario GET (productos en un arreglo, formulario de filtros, función para listas, filtrado, mensajes y persistencia) y otros para las capturas y la documentación.
 4. Se subió la rama a GitHub y se abrió un Pull Request hacia `main`, fusionado con **Create a merge commit** (sin squash) y sin borrar la rama.
+
+### TP N° 6
+
+1. Se creó la rama `feature/tp6-base-de-datos` a partir de `main` actualizado.
+2. Se creó la carpeta `tp6/` con los archivos base (`NORMALIZACION.md`, `schema.sql` y `consultas.sql`).
+3. Se hicieron **commits atómicos**: uno por cada etapa de la normalización (tabla sin normalizar, 1FN, 2FN, 3FN y listado final), uno por cada grupo de tablas del script DDL, uno para los índices, uno por cada operación CRUD (CREATE, READ, UPDATE y DELETE) y otros para correcciones, capturas y documentación. También se incluyó un commit `fix:` con un ajuste de CSS pendiente de un TP anterior.
+4. Cada script se probó desde la terminal antes de su commit y, al final, ambos se importaron en phpMyAdmin sin errores.
+5. Se subió la rama a GitHub y se abrió un Pull Request hacia `main`, fusionado con **Create a merge commit** (sin squash) y sin borrar la rama.
 
 Los mensajes de commit siguen una convención de prefijos:
 
@@ -508,6 +542,9 @@ Los mensajes de commit siguen una convención de prefijos:
 - La validación que garantiza la seguridad está en el servidor: los atributos HTML5 (`required`, `type="email"`) solo mejoran la experiencia, y los formularios llevan `novalidate` para que el servidor reciba siempre el envío.
 - Se usan **listas blancas**: el asunto del contacto y los filtros del catálogo (tallas, marcas y origen) solo aceptan valores conocidos; lo demás se descarta.
 - Se probó XSS en el formulario de contacto (en el cuerpo de la página y dentro de un atributo `value`) y en la búsqueda del catálogo: el texto se muestra como texto y no se ejecuta.
+- Desde el TP N° 6, las contraseñas de los usuarios se guardan cifradas con `password_hash()` (columna `password_hash`), nunca en texto plano.
+- Las claves foráneas garantizan la **integridad referencial**: la base rechaza datos que apunten a registros inexistentes y no permite borrar registros en uso (por ejemplo, un producto que ya se vendió).
+- Las credenciales de conexión a la base se guardarán en el `.env` (ignorado por Git) cuando el sitio se conecte a MySQL en el TP N° 7.
 
 ## Auditoría Lighthouse
 
@@ -550,7 +587,7 @@ Para un proyecto con un diseño muy particular, que no se parezca a ningún fram
 - Procesar los formularios restantes (login, registro y checkout) en PHP, con la misma validación y saneamiento; el de contacto y los filtros del catálogo ya se procesan desde el TP N° 5.
 - Bloquear el acceso web al archivo `.env` (por ejemplo, con `.htaccess`) en un servidor real.
 - Hacer funcional el sitio con JavaScript: carrito y ordenamiento de productos.
-- Conectar con una base de datos para productos, usuarios y pedidos.
+- Conectar el sitio con la base `solemate_db` mediante PDO y consultas preparadas (TP N° 7), para que el catálogo, el registro y los pedidos usen datos reales.
 - Optimizar el peso de las imágenes para mejorar el rendimiento.
 - Crear las páginas pendientes del footer (envíos, cambios y devoluciones, preguntas frecuentes).
 - Enviar realmente el mensaje de contacto (por correo o guardándolo en una base de datos).
@@ -559,4 +596,4 @@ Para un proyecto con un diseño muy particular, que no se parezca a ningún fram
 ## Datos académicos
 
 Tecnicatura Superior en Análisis, Diseño y Desarrollo de Software – IES N° 6001, Salta, Argentina
-Materia: Programación Web – TP N° 3, TP N° 4 y TP N° 5
+Materia: Programación Web – TP N° 3, TP N° 4, TP N° 5 y TP N° 6
