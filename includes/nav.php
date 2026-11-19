@@ -35,6 +35,10 @@ $menu = [
         </form>
 
         <nav class="header-actions" aria-label="Cuenta y carrito">
+          <a class="icon-link" href="<?= $ruta_base ?>admin/index.php" aria-label="Panel de administración" title="Panel de administración">
+            <i class="bi bi-speedometer2" aria-hidden="true"></i>
+          </a>
+          
           <a class="icon-link" href="<?= $ruta_base ?>login.php" aria-label="Iniciar sesión">
             <i class="bi bi-person" aria-hidden="true"></i>
           </a>
