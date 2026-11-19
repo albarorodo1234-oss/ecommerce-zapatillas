@@ -28,7 +28,7 @@ require_once 'includes/header.php';
                   <div class="cart-info">
                     <div>
                       <h3 class="cart-name">
-                        <a href="producto.php">Nike Air Max 270</a>
+                        <a href="producto.php?id=1">Nike Air Max 270</a>
                       </h3>
                       <p class="cart-meta">Talla: 41 | Origen: Chile</p>
                     </div>
@@ -58,7 +58,7 @@ require_once 'includes/header.php';
                   <div class="cart-info">
                     <div>
                       <h3 class="cart-name">
-                        <a href="producto.php">Adidas Ultraboost</a>
+                        <a href="producto.php?id=2">Adidas Ultraboost</a>
                       </h3>
                       <p class="cart-meta">Talla: 42 | Origen: Bolivia</p>
                     </div>

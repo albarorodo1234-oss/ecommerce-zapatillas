@@ -208,7 +208,7 @@
                         <span class="talla-ref">ARG 38</span>
                       </div>
                       <h3 class="product-name">
-                        <a class="stretched-link" href="producto.php">Nike Air Max 270</a>
+                        <a class="stretched-link" href="producto.php?id=1">Nike Air Max 270</a>
                       </h3>
                       <p class="product-type">Zapatilla running</p>
                       <div class="price-row">
@@ -239,7 +239,7 @@
                         <span class="talla-ref">ARG 40</span>
                       </div>
                       <h3 class="product-name">
-                        <a class="stretched-link" href="producto.php">Adidas Ultraboost</a>
+                        <a class="stretched-link" href="producto.php?id=2">Adidas Ultraboost</a>
                       </h3>
                       <p class="product-type">Zapatilla running</p>
                       <div class="price-row">
@@ -270,7 +270,7 @@
                         <span class="talla-ref">ARG 41</span>
                       </div>
                       <h3 class="product-name">
-                        <a class="stretched-link" href="producto.php">Jordan 1 Retro</a>
+                        <a class="stretched-link" href="producto.php?id=3">Jordan 1 Retro</a>
                       </h3>
                       <p class="product-type">Zapatilla basketball</p>
                       <div class="price-row">
@@ -301,7 +301,7 @@
                         <span class="talla-ref">ARG 42</span>
                       </div>
                       <h3 class="product-name">
-                        <a class="stretched-link" href="producto.php">New Balance 990</a>
+                        <a class="stretched-link" href="producto.php?id=4">New Balance 990</a>
                       </h3>
                       <p class="product-type">Zapatilla lifestyle</p>
                       <div class="price-row">

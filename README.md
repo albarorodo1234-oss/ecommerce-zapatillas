@@ -1,12 +1,12 @@
 # SoleMate – Ecommerce de zapatillas importadas
 
-Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en cuatro etapas:
+Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en cinco etapas:
 
 - **TP N° 3:** maquetación front-end en HTML5 semántico, CSS3 y Bootstrap, con Git Workflow, SEO y accesibilidad.
 - **TP N° 4:** _Migración a PHP, Modularización (SSI) y Renderizado Server-Side (SSR)_. Las 10 vistas pasaron de HTML estático a PHP, con plantillas reutilizables, título y menú dinámicos, y variables de entorno.
-- **TP N° 5:** _Procesamiento de formularios y seguridad web_. Formulario de contacto por POST y buscador con filtros del catálogo por GET, con sanitización, validación en el servidor, mensajes al usuario y prevención de XSS. Todo el desarrollo está en la carpeta
+- **TP N° 5:** _Procesamiento de formularios y seguridad web_. Formulario de contacto por POST y buscador con filtros del catálogo por GET, con sanitización, validación en el servidor, mensajes al usuario y prevención de XSS. Todo el desarrollo está en la carpeta [`clase5/`](clase5/).
 - **TP N° 6:** _Diseño y creación del esquema relacional en MySQL_. Base de datos `solemate_db` normalizada hasta la 3FN, con su script de creación (`schema.sql`) y consultas de prueba CRUD (`consultas.sql`). Todo el desarrollo está en la carpeta [`tp6/`](tp6/).
-  [`clase5/`](clase5/).
+- **TP N° 7:** _Persistencia y conexión PHP-MySQL segura_. El sitio se conecta a `solemate_db` con PDO: panel de administración con el CRUD de productos (carpeta [`admin/`](admin/)) y catálogo y detalle de producto leídos de la base, con consultas preparadas y protección XSS. Se desarrolló en la aplicación principal.
 
 ## Enlaces
 
@@ -15,6 +15,7 @@ Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y
 - **Informe de auditoría Lighthouse (TP N° 3):** [docs/auditoria-lighthouse.md](docs/auditoria-lighthouse.md)
 - **Desarrollo del TP N° 5:** [carpeta clase5/](clase5/) · [sección del README](#clase-5-procesamiento-de-formularios-y-seguridad-web-tp-n-5)
 - **Desarrollo del TP N° 6:** [carpeta tp6/](tp6/) · [normalización](tp6/NORMALIZACION.md) · [sección del README](#clase-6-diseño-y-creación-del-esquema-relacional-en-mysql-tp-n-6)
+- **Desarrollo del TP N° 7:** [conexión](config/conexion.php) · [panel admin/](admin/) · [sección del README](#clase-7-persistencia-y-conexión-php-mysql-segura-tp-n-7)
 
 > **Nota sobre la publicación:** en el TP N° 3 el sitio era HTML estático y se publicaba en GitHub Pages. Desde el TP N° 4 las vistas son `.php` y necesitan un servidor con PHP, que GitHub Pages no ofrece. Por eso el sitio se ejecuta en local con XAMPP (ver [Cómo ejecutarlo localmente](#cómo-ejecutarlo-localmente)).
 
@@ -308,6 +309,97 @@ Importación de `consultas.sql` sin errores:
 
 ![Productos después del UPDATE y el DELETE](tp6/docs/tp6-10-productos-tras-update-delete.png)
 
+## Clase 7: Persistencia y conexión PHP-MySQL segura (TP N° 7)
+
+El sitio se conectó a la base `solemate_db` del TP N° 6 mediante **PDO**. A diferencia del TP N° 5 y del TP N° 6, este trabajo se desarrolló **en la aplicación principal** (la raíz del repositorio) y no en una carpeta aparte, porque la consigna pide integrar el CRUD a las vistas del sitio y el TP N° 8 continúa sobre la misma aplicación. Las carpetas `clase5/` y `tp6/` se conservan como registro de esos trabajos.
+
+| Requisito de la consigna             | Cómo se resolvió                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Conexión segura (`conexion.php`)** | `config/conexion.php` crea la instancia PDO con `ERRMODE_EXCEPTION`, `FETCH_ASSOC` y `EMULATE_PREPARES` en `false`, dentro de un `try-catch` de `PDOException`. Las credenciales se leen del `.env` (ignorado por Git) con `config/env.php`; el repositorio solo tiene las claves de ejemplo en `.env.example`. Si la conexión falla, el detalle técnico va al log del servidor con `error_log()` y el visitante ve un mensaje genérico. |
+| **Módulo CRUD**                      | Panel de administración de **productos** en `admin/`: listado (`index.php`), alta (`crear.php`), modificación (`editar.php`) y baja (`eliminar.php`).                                                                                                                                                                                                                                                                                    |
+| **Integración con el sitio**         | El panel usa las mismas plantillas (`header`, `nav` y `footer`), Bootstrap y estilos del sitio, y se abre desde el ícono de tablero de la barra superior. El catálogo (`catalogo.php`) y el detalle (`producto.php?id=…`) leen los productos de la base, así que cada cambio del panel se refleja al instante en la tienda.                                                                                                              |
+| **Entidad del modelo del TP N° 6**   | Tabla `productos`, con sus claves foráneas a `marcas`, `categorias` y `origenes` (listas desplegables cargadas desde la base) y el stock por talle de `producto_talle` en el catálogo y en el detalle.                                                                                                                                                                                                                                   |
+| **Sentencias preparadas**            | Todas las consultas (`SELECT`, `INSERT`, `UPDATE` y `DELETE`) usan `prepare()` + `execute()` con `:parametros`. Ningún dato del usuario se concatena en el SQL.                                                                                                                                                                                                                                                                          |
+| **Sanitización XSS**                 | Todo lo que se imprime en las vistas pasa por `e()`, que aplica `htmlspecialchars()` con `ENT_QUOTES` y UTF-8.                                                                                                                                                                                                                                                                                                                           |
+| **Demostración en vivo**             | Ver [Ejecutar el TP N° 7](#ejecutar-el-tp-n-7-crud-con-mysql).                                                                                                                                                                                                                                                                                                                                                                           |
+
+### Archivos del módulo
+
+| Archivo                         | Función                                                                                                                            |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `config/conexion.php`           | Conexión PDO con `try-catch`                                                                                                       |
+| `includes/funciones.php`        | Funciones auxiliares del TP N° 5 (`e()`, `dato_post()`, `dato_get()` y `dato_get_lista()`), incorporadas a la aplicación principal |
+| `admin/index.php`               | **Read:** listado de productos con `INNER JOIN` y mensajes de resultado                                                            |
+| `admin/crear.php`               | **Create:** formulario, validación e `INSERT`                                                                                      |
+| `admin/editar.php`              | **Update:** carga del producto por `id` (`SELECT … WHERE id = :id`) y `UPDATE`                                                     |
+| `admin/eliminar.php`            | **Delete:** `DELETE` por POST                                                                                                      |
+| `admin/producto_comun.php`      | Validación y parámetros compartidos por el alta y la edición                                                                       |
+| `admin/formulario_producto.php` | Formulario compartido por el alta y la edición                                                                                     |
+| `catalogo.php`                  | Catálogo desde la base, con los filtros del TP N° 5 convertidos en condiciones preparadas                                          |
+| `producto.php`                  | Detalle de producto por `id`, con stock por talle y productos relacionados                                                         |
+
+### Decisiones de diseño
+
+- **Validación en el servidor:** el nombre es obligatorio (hasta 100 caracteres); la marca, la categoría y el origen deben existir en la base; el precio va de 1.000 a 99.999.999 (el mínimo detecta el error de escribir "189.900" con punto de miles); la imagen se elige de la carpeta `img/`, y el texto alternativo es obligatorio si hay imagen. Ante un error, el formulario conserva los datos y marca cada campo.
+- **Patrón PRG (Post/Redirect/Get):** después de crear, editar o eliminar se redirige al listado con `?status=…`, así recargar la página no repite la operación. El listado solo muestra mensajes de una lista blanca.
+- **Baja segura:** se elimina por POST y con confirmación, nunca con un enlace GET. Un producto con ventas no se puede borrar (la clave foránea de `detalle_pedidos` es `ON DELETE RESTRICT`): la excepción `23000` se convierte en un aviso, y el producto se puede ocultar desmarcando "Visible en el catálogo" (columna `activo`).
+- **Validación de `id`:** los `id` que llegan por la URL o por un formulario se validan con `FILTER_VALIDATE_INT` antes de consultar la base.
+- **Listas blancas en `ORDER BY` y en nombres de tabla:** como no admiten `:parametros`, solo se aceptan valores fijos definidos en el código.
+- **Rutas desde subcarpetas:** las plantillas anteponen `$ruta_base` a las rutas internas; las páginas de `admin/` lo definen como `'../'`.
+- **Base para el TP N° 8:** cada página resuelve su lógica antes de incluir el encabezado (lo necesitan `session_start()` y las redirecciones), y el panel está agrupado en `admin/`, así que protegerlo solo requerirá incluir el guardián de rutas al principio de cada archivo. **Hasta el TP N° 8, el panel no pide inicio de sesión.**
+
+### Evidencia de funcionamiento
+
+Panel de productos (**Read**), con los nombres de marca, categoría y origen obtenidos con `INNER JOIN`:
+
+![Panel de productos](docs/tp7/tp7-01-panel-listado.png)
+
+**Create:** validación en el servidor, con los datos conservados y los errores marcados en cada campo:
+
+![Validación del formulario de alta](docs/tp7/tp7-02-crear-validacion.png)
+
+Producto creado y redirección al listado con el mensaje de éxito:
+
+![Producto creado](docs/tp7/tp7-03-crear-exito.png)
+
+El producto nuevo aparece al instante en el catálogo público:
+
+![Catálogo con el producto nuevo](docs/tp7/tp7-04-catalogo-reflejo.png)
+
+Y queda guardado en MySQL (phpMyAdmin):
+
+![Tabla productos en phpMyAdmin](docs/tp7/tp7-05-phpmyadmin-productos.png)
+
+**Update:** precio modificado desde el panel:
+
+![Producto editado](docs/tp7/tp7-06-editar.png)
+
+Detalle de producto leído de la base según su `id`, con los talles con stock:
+
+![Detalle de producto](docs/tp7/tp7-07-producto-detalle.png)
+
+**Delete:** un producto con ventas no se puede eliminar (integridad referencial):
+
+![Aviso al eliminar un producto con ventas](docs/tp7/tp7-08-eliminar-con-ventas.png)
+
+Un producto sin ventas se elimina correctamente:
+
+![Producto eliminado](docs/tp7/tp7-09-eliminar-exito.png)
+
+### Pruebas de seguridad
+
+**Inyección SQL y XSS en el formulario:** el nombre `Prueba <script>alert('XSS')</script> '); DROP TABLE productos; --` se guardó como texto, la tabla sigue intacta y el script no se ejecutó:
+
+![Prueba de seguridad en el formulario](docs/tp7/tp7-10-seguridad-formulario.png)
+
+**Inyección SQL y XSS en la búsqueda (GET):** `<script>alert(1)</script>' OR '1'='1` se busca como texto literal (0 resultados) y se muestra sin ejecutarse:
+
+![Prueba de seguridad en la búsqueda](docs/tp7/tp7-11-seguridad-busqueda.png)
+
+**Error de conexión controlado:** con MySQL detenido, el `try-catch` muestra un mensaje genérico sin datos internos:
+
+![Error de conexión controlado](docs/tp7/tp7-12-error-conexion.png)
+
 ## Diseño en Figma
 
 ![Diseño de la home en Figma](docs/diseno/Home.png)
@@ -337,6 +429,7 @@ El naranja del diseño original (`#FF4D00`) no alcanza el contraste mínimo de 4
 - [Bootstrap 5.3.3](https://getbootstrap.com/) y [Bootstrap Icons 1.11.3](https://icons.getbootstrap.com/)
 - JavaScript (archivo base `js/main.js`)
 - **PHP 8** (includes con `require_once`, variables, constantes y `htmlspecialchars()`)
+- **PDO** con consultas preparadas (conexión a MySQL, desde el TP N° 7)
 - **XAMPP** (servidor Apache con PHP para desarrollo local)
 - **MySQL / MariaDB 10.11** y **phpMyAdmin** (base de datos relacional, desde el TP N° 6)
 - Variables de entorno con archivo `.env`
@@ -351,11 +444,20 @@ El naranja del diseño original (`#FF4D00`) no alcanza el contraste mínimo de 4
 ```
 ecommerce-zapatillas/
 ├── config/
-│   └── env.php               # lee el archivo .env y define las constantes
+│   ├── env.php               # lee el archivo .env y define las constantes
+│   └── conexion.php          # conexión PDO con try-catch (TP N° 7)
 ├── includes/
 │   ├── header.php            # <head>, metadatos y estilos
 │   ├── nav.php               # barra superior y menú principal
-│   └── footer.php            # pie de página y scripts
+│   ├── footer.php            # pie de página y scripts
+│   └── funciones.php         # e(), dato_post(), dato_get() y dato_get_lista()
+├── admin/                    # panel de administración: CRUD de productos (TP N° 7)
+│   ├── index.php             # Read: listado
+│   ├── crear.php             # Create: alta
+│   ├── editar.php            # Update: modificación
+│   ├── eliminar.php          # Delete: baja por POST
+│   ├── producto_comun.php    # validación compartida
+│   └── formulario_producto.php  # formulario compartido
 ├── css/
 │   └── styles.css
 ├── js/
@@ -365,7 +467,8 @@ ecommerce-zapatillas/
 │   ├── auditoria-lighthouse.md
 │   ├── diseno/               # capturas del diseño de Figma
 │   ├── lighthouse/           # capturas de la auditoría
-│   └── tp4-*.png             # capturas del TP N° 4
+│   ├── tp4-*.png             # capturas del TP N° 4
+│   └── tp7/                  # capturas tp7-*.png del TP N° 7
 ├── .vscode/settings.json     # formateo con Prettier al guardar
 ├── .env.example              # plantilla de variables de entorno
 ├── .gitignore                # ignora .env y node_modules
@@ -381,7 +484,6 @@ ecommerce-zapatillas/
 ├── checkout.php
 ├── contacto.php
 ├── nosotros.php
-└── README.md
 ├── clase5/                       # desarrollo del TP N° 5 (formularios y seguridad)
 │   ├── config/, css/, img/, js/  # copia de los recursos del TP N° 4
 │   ├── includes/
@@ -472,6 +574,28 @@ También se pueden ejecutar desde la terminal (PowerShell, en la carpeta del pro
 
 Los usuarios de prueba (`admin@solemate.com`, `lucia@mail.com` y `martin@mail.com`) tienen la contraseña `SoleMate2026`, guardada cifrada con `password_hash()`.
 
+### Ejecutar el TP N° 7 (CRUD con MySQL)
+
+1. Crear la base `solemate_db` con los dos scripts del TP N° 6 (ver el apartado anterior).
+2. Agregar al `.env` las claves de conexión (las mismas que figuran en `.env.example`). Con el usuario `root` de XAMPP, que no tiene contraseña:
+
+   ```env
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_NAME=solemate_db
+   DB_USER=root
+   DB_PASS=
+   ```
+
+3. Con **Apache** y **MySQL** encendidos en XAMPP, abrir en el navegador:
+
+   ```
+   http://localhost/ecommerce-zapatillas/admin/         (panel de productos: CRUD)
+   http://localhost/ecommerce-zapatillas/catalogo.php   (catálogo leído de la base)
+   ```
+
+El panel también se abre desde el ícono de tablero de la barra superior. Hasta el TP N° 8 no pide inicio de sesión.
+
 ## Flujo de trabajo con Git
 
 ### TP N° 3
@@ -505,6 +629,14 @@ El proyecto se desarrolló con un flujo basado en ramas y Pull Request:
 2. Se creó la carpeta `tp6/` con los archivos base (`NORMALIZACION.md`, `schema.sql` y `consultas.sql`).
 3. Se hicieron **commits atómicos**: uno por cada etapa de la normalización (tabla sin normalizar, 1FN, 2FN, 3FN y listado final), uno por cada grupo de tablas del script DDL, uno para los índices, uno por cada operación CRUD (CREATE, READ, UPDATE y DELETE) y otros para correcciones, capturas y documentación. También se incluyó un commit `fix:` con un ajuste de CSS pendiente de un TP anterior.
 4. Cada script se probó desde la terminal antes de su commit y, al final, ambos se importaron en phpMyAdmin sin errores.
+5. Se subió la rama a GitHub y se abrió un Pull Request hacia `main`, fusionado con **Create a merge commit** (sin squash) y sin borrar la rama.
+
+### TP N° 7
+
+1. Se creó la rama `feature/tp7-crud-pdo` a partir de `main` actualizado.
+2. Se trabajó en la aplicación principal (no en una carpeta aparte), para integrar el CRUD al sitio y dejar la base del TP N° 8.
+3. Se hicieron **commits atómicos**: uno para las claves de `.env.example`, uno para la conexión PDO, dos para incorporar a la raíz las funciones y el contacto del TP N° 5, un `refactor:` para las rutas de las plantillas, uno para el acceso al panel, uno por cada operación del CRUD (más uno para la validación y otro para el formulario compartidos), uno para el catálogo, uno para el detalle de producto, un `fix:` para los enlaces a ese detalle y otros para las capturas y la documentación.
+4. Cada archivo se verificó con `php -l` y se probó en el navegador antes de su commit.
 5. Se subió la rama a GitHub y se abrió un Pull Request hacia `main`, fusionado con **Create a merge commit** (sin squash) y sin borrar la rama.
 
 Los mensajes de commit siguen una convención de prefijos:
@@ -544,7 +676,8 @@ Los mensajes de commit siguen una convención de prefijos:
 - Se probó XSS en el formulario de contacto (en el cuerpo de la página y dentro de un atributo `value`) y en la búsqueda del catálogo: el texto se muestra como texto y no se ejecuta.
 - Desde el TP N° 6, las contraseñas de los usuarios se guardan cifradas con `password_hash()` (columna `password_hash`), nunca en texto plano.
 - Las claves foráneas garantizan la **integridad referencial**: la base rechaza datos que apunten a registros inexistentes y no permite borrar registros en uso (por ejemplo, un producto que ya se vendió).
-- Las credenciales de conexión a la base se guardarán en el `.env` (ignorado por Git) cuando el sitio se conecte a MySQL en el TP N° 7.
+- Desde el TP N° 7, la conexión a MySQL usa PDO con consultas preparadas reales (`ATTR_EMULATE_PREPARES` en `false`) en todas las operaciones: los datos viajan separados del SQL, lo que impide la **inyección SQL**. Se probó con `' OR '1'='1` en la búsqueda del catálogo y con `'); DROP TABLE productos; --` en el formulario del panel: los dos se trataron como texto.
+- Las credenciales de la base están en el `.env` (ignorado por Git), y los errores de conexión o de consulta se registran con `error_log()` sin mostrar detalles técnicos al visitante.
 
 ## Auditoría Lighthouse
 
@@ -586,14 +719,15 @@ Para un proyecto con un diseño muy particular, que no se parezca a ningún fram
 
 - Procesar los formularios restantes (login, registro y checkout) en PHP, con la misma validación y saneamiento; el de contacto y los filtros del catálogo ya se procesan desde el TP N° 5.
 - Bloquear el acceso web al archivo `.env` (por ejemplo, con `.htaccess`) en un servidor real.
-- Hacer funcional el sitio con JavaScript: carrito y ordenamiento de productos.
-- Conectar el sitio con la base `solemate_db` mediante PDO y consultas preparadas (TP N° 7), para que el catálogo, el registro y los pedidos usen datos reales.
+- Hacer funcional el carrito con JavaScript.
+- Proteger el panel `admin/` con inicio de sesión y control de acceso por rol (TP N° 8), y usar la base también en el registro y en los pedidos.
+- Administrar desde el panel el stock por talle y permitir subir imágenes nuevas.
 - Optimizar el peso de las imágenes para mejorar el rendimiento.
 - Crear las páginas pendientes del footer (envíos, cambios y devoluciones, preguntas frecuentes).
 - Enviar realmente el mensaje de contacto (por correo o guardándolo en una base de datos).
-- Agregar sesiones, control de acceso y un token CSRF en los formularios POST.
+- Agregar un token CSRF en los formularios POST.
 
 ## Datos académicos
 
 Tecnicatura Superior en Análisis, Diseño y Desarrollo de Software – IES N° 6001, Salta, Argentina
-Materia: Programación Web – TP N° 3, TP N° 4, TP N° 5 y TP N° 6
+Materia: Programación Web – TP N° 3, TP N° 4, TP N° 5, TP N° 6 y TP N° 7

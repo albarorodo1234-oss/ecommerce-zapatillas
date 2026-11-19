@@ -7,7 +7,7 @@
       <div class="container">
         <div class="row g-4 footer-top">
           <div class="col-lg-6">
-            <a class="brand brand-light" href="index.php">
+            <a class="brand brand-light" href="<?= $ruta_base ?>index.php">
               <span class="brand-mark brand-mark-light" aria-hidden="true"
                 ><i class="bi bi-x-circle"></i
               ></span>
@@ -34,9 +34,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Tienda">
             <h2 class="footer-title">Tienda</h2>
             <ul class="footer-links">
-              <li><a href="catalogo.php">Nuevas Llegadas</a></li>
-              <li><a href="catalogo.php">Más Vendidos</a></li>
-              <li><a href="catalogo.php">Colecciones</a></li>
+              <li><a href="<?= $ruta_base ?>catalogo.php">Nuevas Llegadas</a></li>
+              <li><a href="<?= $ruta_base ?>catalogo.php">Más Vendidos</a></li>
+              <li><a href="<?= $ruta_base ?>catalogo.php">Colecciones</a></li>
             </ul>
           </nav>
 
@@ -53,9 +53,9 @@
           <nav class="col-6 col-md-4 col-lg-2" aria-label="Empresa">
             <h2 class="footer-title">Empresa</h2>
             <ul class="footer-links">
-              <li><a href="nosotros.php">Acerca de Nosotros</a></li>
+              <li><a href="<?= $ruta_base ?>nosotros.php">Acerca de Nosotros</a></li>
               <li><a href="#">Carreras</a></li>
-              <li><a href="contacto.php">Contacto</a></li>
+              <li><a href="<?= $ruta_base ?>contacto.php">Contacto</a></li>
             </ul>
           </nav>
         </div>
@@ -93,6 +93,6 @@
       </div>
     </footer>
 
-    <script src="js/main.js"></script>
+    <script src="<?= $ruta_base ?>js/main.js"></script>
   </body>
 </html>
