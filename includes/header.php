@@ -10,6 +10,11 @@ require_once __DIR__ . '/../config/env.php';
 // Si la página no define un valor, se usa uno por defecto
 $titulo_pagina      = $titulo_pagina ?? APP_NAME;
 $descripcion_pagina = $descripcion_pagina ?? 'Zapatillas importadas de Chile y Bolivia: Nike, Jordan, Adidas y New Balance. Envío rápido, 100% auténticas y cuotas sin interés.';
+
+// Prefijo de las rutas internas (css, js y enlaces del menú).
+// Las páginas de la raíz no lo definen (queda vacío); las de una
+// subcarpeta, como admin/, definen $ruta_base = '../'; antes del header.
+$ruta_base = $ruta_base ?? '';
 ?>
 <!doctype html>
 <html lang="es">
@@ -43,7 +48,7 @@ $descripcion_pagina = $descripcion_pagina ?? 'Zapatillas importadas de Chile y B
     />
 
     <!-- Nuestros estilos (siempre al final para poder sobrescribir Bootstrap) -->
-    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="<?= $ruta_base ?>css/styles.css" />
   </head>
 
   <body>
