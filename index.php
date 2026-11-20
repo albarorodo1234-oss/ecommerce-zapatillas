@@ -1,4 +1,4 @@
-   <?php
+<?php
    $titulo_pagina      = "SoleMate | Zapatillas importadas de Chile y Bolivia";
    $descripcion_pagina = "Zapatillas importadas de Chile y Bolivia: Nike, Jordan, Adidas y New Balance. Envío rápido, 100% auténticas y cuotas sin interés.";
    $pagina_activa      = "inicio";
