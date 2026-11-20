@@ -1,12 +1,13 @@
 # SoleMate – Ecommerce de zapatillas importadas
 
-Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en cinco etapas:
+Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en seis etapas:
 
 - **TP N° 3:** maquetación front-end en HTML5 semántico, CSS3 y Bootstrap, con Git Workflow, SEO y accesibilidad.
 - **TP N° 4:** _Migración a PHP, Modularización (SSI) y Renderizado Server-Side (SSR)_. Las 10 vistas pasaron de HTML estático a PHP, con plantillas reutilizables, título y menú dinámicos, y variables de entorno.
 - **TP N° 5:** _Procesamiento de formularios y seguridad web_. Formulario de contacto por POST y buscador con filtros del catálogo por GET, con sanitización, validación en el servidor, mensajes al usuario y prevención de XSS. Todo el desarrollo está en la carpeta [`clase5/`](clase5/).
 - **TP N° 6:** _Diseño y creación del esquema relacional en MySQL_. Base de datos `solemate_db` normalizada hasta la 3FN, con su script de creación (`schema.sql`) y consultas de prueba CRUD (`consultas.sql`). Todo el desarrollo está en la carpeta [`tp6/`](tp6/).
 - **TP N° 7:** _Persistencia y conexión PHP-MySQL segura_. El sitio se conecta a `solemate_db` con PDO: panel de administración con el CRUD de productos (carpeta [`admin/`](admin/)) y catálogo y detalle de producto leídos de la base, con consultas preparadas y protección XSS. Se desarrolló en la aplicación principal.
+- **TP N° 8:** _Manejo de estado, sesiones y autenticación_. Registro, inicio y cierre de sesión con sesiones de PHP y contraseñas cifradas con bcrypt, guardián de rutas y control de acceso por rol: el panel `admin/` solo lo usa el Administrador. Se desarrolló en la aplicación principal.
 
 ## Enlaces
 
@@ -16,6 +17,7 @@ Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y
 - **Desarrollo del TP N° 5:** [carpeta clase5/](clase5/) · [sección del README](#clase-5-procesamiento-de-formularios-y-seguridad-web-tp-n-5)
 - **Desarrollo del TP N° 6:** [carpeta tp6/](tp6/) · [normalización](tp6/NORMALIZACION.md) · [sección del README](#clase-6-diseño-y-creación-del-esquema-relacional-en-mysql-tp-n-6)
 - **Desarrollo del TP N° 7:** [conexión](config/conexion.php) · [panel admin/](admin/) · [sección del README](#clase-7-persistencia-y-conexión-php-mysql-segura-tp-n-7)
+- **Desarrollo del TP N° 8:** [guardián de rutas](includes/auth_guard.php) · [login](login.php) · [registro](registro.php) · [sección del README](#clase-8-manejo-de-estado-sesiones-y-autenticación-tp-n-8)
 
 > **Nota sobre la publicación:** en el TP N° 3 el sitio era HTML estático y se publicaba en GitHub Pages. Desde el TP N° 4 las vistas son `.php` y necesitan un servidor con PHP, que GitHub Pages no ofrece. Por eso el sitio se ejecuta en local con XAMPP (ver [Cómo ejecutarlo localmente](#cómo-ejecutarlo-localmente)).
 
@@ -346,7 +348,7 @@ El sitio se conectó a la base `solemate_db` del TP N° 6 mediante **PDO**. A di
 - **Validación de `id`:** los `id` que llegan por la URL o por un formulario se validan con `FILTER_VALIDATE_INT` antes de consultar la base.
 - **Listas blancas en `ORDER BY` y en nombres de tabla:** como no admiten `:parametros`, solo se aceptan valores fijos definidos en el código.
 - **Rutas desde subcarpetas:** las plantillas anteponen `$ruta_base` a las rutas internas; las páginas de `admin/` lo definen como `'../'`.
-- **Base para el TP N° 8:** cada página resuelve su lógica antes de incluir el encabezado (lo necesitan `session_start()` y las redirecciones), y el panel está agrupado en `admin/`, así que protegerlo solo requerirá incluir el guardián de rutas al principio de cada archivo. **Hasta el TP N° 8, el panel no pide inicio de sesión.**
+- **Base para el TP N° 8:** cada página resuelve su lógica antes de incluir el encabezado (lo necesitan `session_start()` y las redirecciones), y el panel está agrupado en `admin/`, así que protegerlo solo requería incluir el guardián de rutas al principio de cada archivo. **Desde el TP N° 8, el panel solo lo puede usar el rol Administrador** (ver [Clase 8](#clase-8-manejo-de-estado-sesiones-y-autenticación-tp-n-8)).
 
 ### Evidencia de funcionamiento
 
@@ -400,6 +402,116 @@ Un producto sin ventas se elimina correctamente:
 
 ![Error de conexión controlado](docs/tp7/tp7-12-error-conexion.png)
 
+## Clase 8: Manejo de estado, sesiones y autenticación (TP N° 8)
+
+El sitio incorporó **registro, inicio y cierre de sesión** con sesiones de PHP, contraseñas cifradas con **bcrypt** y un **guardián de rutas** con control de acceso por rol. Igual que el TP N° 7, se desarrolló **en la aplicación principal**: el panel `admin/` que en el TP N° 7 estaba abierto a cualquier visitante ahora solo lo puede usar el rol Administrador.
+
+| Requisito de la consigna                         | Cómo se resolvió                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Base de datos (`usuarios`)**                   | Se usa la tabla `usuarios` del TP N° 6, que ya tenía `id`, `nombre`, `email` único, `password_hash` (VARCHAR 255) y `created_at`. El rol se guarda en `rol_id`, clave foránea a la tabla `roles` (ver la equivalencia más abajo). No hizo falta modificar la base.                                                                                                   |
+| **Registro (`registro.php`)**                    | Validación estricta en el servidor (el nombre solo admite letras, espacios, apóstrofo, punto y guion; correo con `filter_var()`; contraseña de 8 a 72 caracteres repetida dos veces; aceptación de términos). Verifica con un `SELECT` preparado que el correo no exista, cifra con `password_hash($password, PASSWORD_BCRYPT)` e inserta con un `INSERT` preparado. |
+| **Autenticación (`login.php`)**                  | Busca al usuario por correo (con un `JOIN` a `roles`) y compara con `password_verify()`. Si es correcto: `session_start()` (en `includes/sesion.php`), `session_regenerate_id(true)`, guarda `$_SESSION['usuario_id']`, `$_SESSION['usuario_nombre']` y `$_SESSION['rol']`, y redirige al panel (Administrador) o a `mi-cuenta.php` (Cliente).                    |
+| **Guardián de rutas (`includes/auth_guard.php`)** | Script reutilizable que verifica `isset($_SESSION['usuario_id'])` y, si no hay sesión, redirige a `login.php?error=acceso_denegado`. La función `verificarRol('Administrador')` responde **403 Prohibido** a cualquier otro rol.                                                                                                                                      |
+| **Vistas protegidas**                            | Solo rol Administrador: las 4 páginas del panel (`admin/index.php`, `crear.php`, `editar.php` y `eliminar.php`). Cualquier usuario con sesión: `mi-cuenta.php` y `checkout.php`.                                                                                                                                                                                     |
+| **Cierre de sesión (`logout.php`)**              | Vacía `$_SESSION`, borra la cookie de sesión del navegador (`setcookie()` con vencimiento en el pasado), destruye la sesión con `session_destroy()` y redirige al login.                                                                                                                                                                                           |
+| **Cookies de sesión seguras**                    | `includes/sesion.php` configura `cookie_httponly`, `use_only_cookies`, `use_strict_mode`, `cookie_samesite = Lax` y `cookie_secure` cuando el sitio se sirve por HTTPS.                                                                                                                                                                                            |
+| **Integración en la aplicación principal**       | Todo funciona con las plantillas del sitio. La barra superior cambia según la sesión: el ícono del panel solo lo ve el Administrador, y con la sesión iniciada aparecen "Mi cuenta" (con el nombre) y "Cerrar sesión".                                                                                                                                              |
+
+### Equivalencia con la estructura recomendada
+
+La consigna recomienda una tabla `usuarios` con las columnas `password` y `rol` (texto `'admin'` / `'usuario'`). Se conservó el diseño normalizado del TP N° 6, que cumple la misma función:
+
+| Consigna                        | SoleMate (`solemate_db`)                                              | Motivo                                                                                                                                                         |
+| ------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `password` VARCHAR(255)         | `password_hash` VARCHAR(255)                                          | El nombre deja claro que guarda un hash y nunca la contraseña.                                                                                                |
+| `rol` VARCHAR (`'admin'` / `'usuario'`) | `rol_id` → tabla `roles` (`Administrador` / `Cliente`)        | Diseño en 3FN del TP N° 6: los nombres de rol no se repiten en cada fila y no se pueden escribir mal. En el login, un `JOIN` trae el nombre del rol para `$_SESSION['rol']`. |
+| `admin_panel.php`               | `admin/index.php`                                                     | El panel del TP N° 7 ya existía con ese nombre; se protege con `verificarRol('Administrador')`.                                                                |
+| `auth_guard.php`                | `includes/auth_guard.php`                                             | Va junto a las demás piezas reutilizables (`header.php`, `nav.php`, `funciones.php`).                                                                          |
+
+### Archivos del módulo
+
+| Archivo                   | Función                                                                                                         |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `includes/sesion.php`     | Inicia la sesión con la configuración segura de la cookie. Lo incluyen `header.php`, el login, el logout y el guardián |
+| `registro.php`            | Registro de clientes con validación, control de correo duplicado y `PASSWORD_BCRYPT`                            |
+| `login.php`               | Inicio de sesión con `password_verify()`, `session_regenerate_id(true)` y redirección según el rol              |
+| `logout.php`              | Cierre de sesión: vacía `$_SESSION`, borra la cookie y destruye la sesión                                       |
+| `includes/auth_guard.php` | Guardián de rutas (autenticación) y `verificarRol()` (autorización)                                             |
+| `includes/prohibido.php`  | Página "403 Acceso prohibido" con el diseño del sitio                                                           |
+| `mi-cuenta.php`           | Vista protegida con los datos de la cuenta; destino del cliente tras el login                                   |
+| `checkout.php`            | Exige sesión iniciada para finalizar la compra                                                                  |
+| `includes/nav.php`        | Accesos de la barra según la sesión y el rol                                                                    |
+| `admin/*.php`             | Las 4 páginas del panel incluyen el guardián y `verificarRol('Administrador')`                                  |
+
+### Acceso a cada página según el rol
+
+| Página                              | Visitante sin sesión            | Cliente                  | Administrador |
+| ----------------------------------- | ------------------------------- | ------------------------ | ------------- |
+| Tienda (inicio, catálogo, producto…) | ✅                              | ✅                       | ✅            |
+| `registro.php` y `login.php`        | ✅                              | Redirige a su página     | Redirige al panel |
+| `mi-cuenta.php` y `checkout.php`    | ➡️ `login.php?error=acceso_denegado` | ✅                  | ✅            |
+| `admin/` (listado, alta, edición y baja) | ➡️ `login.php?error=acceso_denegado` | ⛔ 403 Prohibido | ✅            |
+
+### Decisiones de diseño
+
+- **Sesión centralizada:** `session_start()` y la configuración de la cookie están en un solo archivo (`includes/sesion.php`). Como cada página resuelve su lógica antes de incluir el encabezado (base que dejó el TP N° 7), la sesión siempre se inicia antes de enviar HTML.
+- **`cookie_secure` condicional:** la teoría recomienda `session.cookie_secure = 1`, que obliga a usar HTTPS. En XAMPP el sitio se sirve por HTTP, así que la cookie se marca como `Secure` solo cuando la página llega por HTTPS; si no, el navegador nunca la devolvería y el login no funcionaría.
+- **Protección extra de la sesión:** `use_strict_mode` hace que PHP rechace identificadores de sesión inventados (complementa a `session_regenerate_id(true)` contra la fijación de sesión) y `SameSite=Lax` impide que otro sitio envíe formularios con la sesión del usuario.
+- **Mensajes genéricos en el login:** si el correo no existe o la contraseña es incorrecta, el mensaje es el mismo ("Correo o contraseña incorrectos"), para no revelar qué correos están registrados.
+- **Datos mínimos en la sesión:** solo `usuario_id`, `usuario_nombre` y `rol`; nunca la contraseña ni su hash. `mi-cuenta.php` lee el resto de los datos de la base con el `usuario_id`.
+- **Largo de la contraseña:** de 8 a 72 caracteres, porque bcrypt solo usa los primeros 72 bytes.
+- **Correo en minúsculas:** el registro y el login convierten el correo a minúsculas, así `Lucia@Mail.com` y `lucia@mail.com` son la misma cuenta. Si dos personas intentan registrar el mismo correo al mismo tiempo, el índice único de la base lo impide (error `1062`) y se muestra el mismo aviso.
+- **Patrón PRG y listas blancas:** el registro redirige a `login.php?status=registrado`, y el login solo muestra los avisos de una lista blanca (`acceso_denegado`, `registrado` y `logout`), igual que los `?status=` del panel.
+- **403 con el diseño del sitio:** `verificarRol()` responde con el código HTTP 403 y muestra una página con el encabezado y el pie del sitio, en lugar de un mensaje suelto.
+- **Rutas desde subcarpetas:** el guardián antepone `$ruta_base` a `login.php`, así redirige bien desde la raíz y desde `admin/`.
+- **Base para el TP N° 9:** como `sesion.php` y el guardián están separados del HTML, los futuros endpoints JSON (`api/*.php`) podrán abrir la sesión y verificar al usuario sin cargar las plantillas.
+
+### Evidencia de funcionamiento
+
+**Registro con validación en el servidor:** un nombre con `<script>` se rechaza y se muestra como texto (no se ejecuta), el correo ya registrado se detecta, y se marcan las contraseñas distintas y los términos sin aceptar:
+
+![Validación del registro](docs/tp8/tp8-01-registro-validacion.png)
+
+Registro correcto: redirección al login con el mensaje de éxito (patrón PRG):
+
+![Registro exitoso](docs/tp8/tp8-02-registro-exito.png)
+
+En la base, la contraseña queda guardada como hash **bcrypt** (`$2y$10$…`), nunca en texto plano:
+
+![Hash bcrypt en phpMyAdmin](docs/tp8/tp8-03-phpmyadmin-hash-bcrypt.png)
+
+Credenciales incorrectas: mensaje genérico que no revela si el correo existe:
+
+![Error de login](docs/tp8/tp8-04-login-error.png)
+
+Cookie `PHPSESSID` antes del login, con `HttpOnly` y `SameSite=Lax`:
+
+![Cookie antes del login](docs/tp8/tp8-05-cookie-antes-del-login.png)
+
+Después del login, el cliente llega a **Mi cuenta**, la barra muestra su nombre y el `PHPSESSID` **cambió de valor**: es el efecto de `session_regenerate_id(true)` contra la fijación de sesión:
+
+![Mi cuenta y cookie regenerada](docs/tp8/tp8-06-mi-cuenta-cliente-cookie-regenerada.png)
+
+Los datos de `$_SESSION` se guardan en el servidor (archivo `sess_…` de XAMPP), no en el navegador:
+
+![Sesión guardada en el servidor](docs/tp8/tp8-07-sesion-en-el-servidor.png)
+
+**Control por rol:** un Cliente que escribe la URL del panel recibe un **403 Prohibido**:
+
+![Cliente bloqueado con 403](docs/tp8/tp8-08-cliente-403-prohibido.png)
+
+**Logout:** la sesión se destruye y se vuelve al login con un aviso:
+
+![Cierre de sesión](docs/tp8/tp8-09-logout.png)
+
+**Guardián de rutas:** sin sesión, el panel redirige a `login.php?error=acceso_denegado`:
+
+![Acceso denegado sin sesión](docs/tp8/tp8-10-acceso-denegado.png)
+
+El Administrador entra directo al panel, y solo él ve el acceso al panel en la barra:
+
+![Panel del administrador](docs/tp8/tp8-11-admin-panel.png)
+
 ## Diseño en Figma
 
 ![Diseño de la home en Figma](docs/diseno/Home.png)
@@ -430,6 +542,7 @@ El naranja del diseño original (`#FF4D00`) no alcanza el contraste mínimo de 4
 - JavaScript (archivo base `js/main.js`)
 - **PHP 8** (includes con `require_once`, variables, constantes y `htmlspecialchars()`)
 - **PDO** con consultas preparadas (conexión a MySQL, desde el TP N° 7)
+- **Sesiones de PHP** (`$_SESSION`) y `password_hash()` / `password_verify()` con bcrypt (autenticación, desde el TP N° 8)
 - **XAMPP** (servidor Apache con PHP para desarrollo local)
 - **MySQL / MariaDB 10.11** y **phpMyAdmin** (base de datos relacional, desde el TP N° 6)
 - Variables de entorno con archivo `.env`
@@ -450,8 +563,11 @@ ecommerce-zapatillas/
 │   ├── header.php            # <head>, metadatos y estilos
 │   ├── nav.php               # barra superior y menú principal
 │   ├── footer.php            # pie de página y scripts
-│   └── funciones.php         # e(), dato_post(), dato_get() y dato_get_lista()
-├── admin/                    # panel de administración: CRUD de productos (TP N° 7)
+│   ├── funciones.php         # e(), dato_post(), dato_get() y dato_get_lista()
+│   ├── sesion.php            # inicio de sesión con cookie segura (TP N° 8)
+│   ├── auth_guard.php        # guardián de rutas y verificarRol() (TP N° 8)
+│   └── prohibido.php         # página 403 Acceso prohibido (TP N° 8)
+├── admin/                    # panel de administración: CRUD de productos (TP N° 7), solo Administrador (TP N° 8)
 │   ├── index.php             # Read: listado
 │   ├── crear.php             # Create: alta
 │   ├── editar.php            # Update: modificación
@@ -468,7 +584,8 @@ ecommerce-zapatillas/
 │   ├── diseno/               # capturas del diseño de Figma
 │   ├── lighthouse/           # capturas de la auditoría
 │   ├── tp4-*.png             # capturas del TP N° 4
-│   └── tp7/                  # capturas tp7-*.png del TP N° 7
+│   ├── tp7/                  # capturas tp7-*.png del TP N° 7
+│   └── tp8/                  # capturas tp8-*.png del TP N° 8
 ├── .vscode/settings.json     # formateo con Prettier al guardar
 ├── .env.example              # plantilla de variables de entorno
 ├── .gitignore                # ignora .env y node_modules
@@ -478,10 +595,12 @@ ecommerce-zapatillas/
 ├── catalogo.php
 ├── producto.php
 ├── carrito.php
-├── login.php
-├── registro.php
+├── login.php                 # inicio de sesión (TP N° 8)
+├── registro.php              # registro de clientes (TP N° 8)
+├── logout.php                # cierre de sesión (TP N° 8)
+├── mi-cuenta.php             # vista protegida de la cuenta (TP N° 8)
 ├── guia-tallas.php
-├── checkout.php
+├── checkout.php              # requiere sesión iniciada (TP N° 8)
 ├── contacto.php
 ├── nosotros.php
 ├── clase5/                       # desarrollo del TP N° 5 (formularios y seguridad)
@@ -594,7 +713,29 @@ Los usuarios de prueba (`admin@solemate.com`, `lucia@mail.com` y `martin@mail.co
    http://localhost/ecommerce-zapatillas/catalogo.php   (catálogo leído de la base)
    ```
 
-El panel también se abre desde el ícono de tablero de la barra superior. Hasta el TP N° 8 no pide inicio de sesión.
+El panel también se abre desde el ícono de tablero de la barra superior. Desde el TP N° 8 pide iniciar sesión como Administrador (ver el apartado siguiente).
+
+### Ejecutar el TP N° 8 (sesiones y autenticación)
+
+No necesita cambios en la base ni en el `.env`: usa la misma configuración del TP N° 7.
+
+1. Con **Apache** y **MySQL** encendidos en XAMPP, abrir en el navegador:
+
+   ```
+   http://localhost/ecommerce-zapatillas/registro.php    (crear una cuenta de cliente)
+   http://localhost/ecommerce-zapatillas/login.php       (iniciar sesión)
+   http://localhost/ecommerce-zapatillas/admin/          (panel: solo Administrador)
+   ```
+
+2. Usuarios de prueba (contraseña `SoleMate2026`):
+
+   | Correo               | Rol           | Después del login va a… |
+   | -------------------- | ------------- | ----------------------- |
+   | `admin@solemate.com` | Administrador | `admin/index.php`       |
+   | `lucia@mail.com`     | Cliente       | `mi-cuenta.php`         |
+   | `martin@mail.com`    | Cliente       | `mi-cuenta.php`         |
+
+3. Para cerrar sesión, usar el ícono de salida de la barra superior (o abrir `logout.php`).
 
 ## Flujo de trabajo con Git
 
@@ -639,6 +780,14 @@ El proyecto se desarrolló con un flujo basado en ramas y Pull Request:
 4. Cada archivo se verificó con `php -l` y se probó en el navegador antes de su commit.
 5. Se subió la rama a GitHub y se abrió un Pull Request hacia `main`, fusionado con **Create a merge commit** (sin squash) y sin borrar la rama.
 
+### TP N° 8
+
+1. Se creó la rama `feature/tp8-sesiones-auth` a partir de `main` actualizado (con el TP N° 7 ya fusionado).
+2. Se trabajó en la aplicación principal, sobre el panel y las vistas del TP N° 7.
+3. Se hicieron **commits atómicos**: un `fix:` para los espacios antes de `<?php` en `index.php` (impedían enviar la cookie de sesión), uno para la sesión segura centralizada, uno para el registro, uno para el login, uno para el logout, uno para el guardián de rutas con la página 403, uno para proteger el panel, uno para `mi-cuenta.php`, uno para el checkout protegido, uno para la barra según la sesión y otros para las capturas y la documentación.
+4. Cada archivo se verificó con `php -l` y se probó en el navegador (con cada rol y sin sesión) antes de su commit.
+5. Se subió la rama a GitHub y se abrió un Pull Request hacia `main`, fusionado con **Create a merge commit** (sin squash) y sin borrar la rama.
+
 Los mensajes de commit siguen una convención de prefijos:
 
 | Prefijo     | Uso                                           |
@@ -678,6 +827,9 @@ Los mensajes de commit siguen una convención de prefijos:
 - Las claves foráneas garantizan la **integridad referencial**: la base rechaza datos que apunten a registros inexistentes y no permite borrar registros en uso (por ejemplo, un producto que ya se vendió).
 - Desde el TP N° 7, la conexión a MySQL usa PDO con consultas preparadas reales (`ATTR_EMULATE_PREPARES` en `false`) en todas las operaciones: los datos viajan separados del SQL, lo que impide la **inyección SQL**. Se probó con `' OR '1'='1` en la búsqueda del catálogo y con `'); DROP TABLE productos; --` en el formulario del panel: los dos se trataron como texto.
 - Las credenciales de la base están en el `.env` (ignorado por Git), y los errores de conexión o de consulta se registran con `error_log()` sin mostrar detalles técnicos al visitante.
+- Desde el TP N° 8, el registro cifra las contraseñas con `password_hash($password, PASSWORD_BCRYPT)` y el login las compara con `password_verify()`, según las recomendaciones de **OWASP**. El login no revela si un correo está registrado.
+- La sesión usa una cookie `PHPSESSID` con `HttpOnly` (JavaScript no puede leerla), `SameSite=Lax`, `use_only_cookies` (el id nunca viaja en la URL), `use_strict_mode` y `Secure` cuando hay HTTPS. Tras un login correcto se llama a `session_regenerate_id(true)` para evitar la **fijación de sesión**.
+- El **control de acceso** se hace en el servidor, al principio de cada página protegida: ocultar el ícono del panel no alcanza, por eso el guardián redirige a quien no inició sesión y responde **403** al rol que no corresponde, aunque se escriba la URL a mano o se envíe un formulario directo a `admin/eliminar.php`.
 
 ## Auditoría Lighthouse
 
@@ -717,10 +869,11 @@ Para un proyecto con un diseño muy particular, que no se parezca a ningún fram
 
 ## Mejoras futuras
 
-- Procesar los formularios restantes (login, registro y checkout) en PHP, con la misma validación y saneamiento; el de contacto y los filtros del catálogo ya se procesan desde el TP N° 5.
+- Procesar el formulario del checkout en PHP y guardar los pedidos en la base; el contacto, los filtros del catálogo (TP N° 5), el login y el registro (TP N° 8) ya se procesan en el servidor.
 - Bloquear el acceso web al archivo `.env` (por ejemplo, con `.htaccess`) en un servidor real.
 - Hacer funcional el carrito con JavaScript.
-- Proteger el panel `admin/` con inicio de sesión y control de acceso por rol (TP N° 8), y usar la base también en el registro y en los pedidos.
+- Limitar los intentos de inicio de sesión fallidos, agregar la recuperación de contraseña y permitir editar los datos desde "Mi cuenta".
+- Servir el sitio por HTTPS en producción, para que la cookie de sesión viaje siempre marcada como `Secure`.
 - Administrar desde el panel el stock por talle y permitir subir imágenes nuevas.
 - Optimizar el peso de las imágenes para mejorar el rendimiento.
 - Crear las páginas pendientes del footer (envíos, cambios y devoluciones, preguntas frecuentes).
@@ -730,4 +883,4 @@ Para un proyecto con un diseño muy particular, que no se parezca a ningún fram
 ## Datos académicos
 
 Tecnicatura Superior en Análisis, Diseño y Desarrollo de Software – IES N° 6001, Salta, Argentina
-Materia: Programación Web – TP N° 3, TP N° 4, TP N° 5, TP N° 6 y TP N° 7
+Materia: Programación Web – TP N° 3, TP N° 4, TP N° 5, TP N° 6, TP N° 7 y TP N° 8
