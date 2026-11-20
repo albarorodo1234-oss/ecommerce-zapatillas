@@ -10,10 +10,10 @@ require_once __DIR__ . '/includes/funciones.php';
 require_once __DIR__ . '/includes/sesion.php';
 
 // Lleva a cada usuario a su página según el rol: el Administrador va a su panel
-// y el resto, al inicio de la tienda.
+// y el resto, a su cuenta (mi-cuenta.php).
 function redirigir_segun_rol(string $rol): never
 {
-    header('Location: ' . ($rol === 'Administrador' ? 'admin/index.php' : 'index.php'));
+    header('Location: ' . ($rol === 'Administrador' ? 'admin/index.php' : 'mi-cuenta.php'));
     exit;
 }
 
