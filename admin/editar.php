@@ -3,7 +3,7 @@
 // Modificación de productos (UPDATE del CRUD): carga el producto indicado
 // en la URL (?id=...), muestra el formulario con sus datos y, al enviarlo,
 // valida y guarda los cambios con una consulta preparada.
-// TP8: aquí se agregará el guardián de rutas (solo rol Administrador).
+// TP8: protegido por el guardián de rutas (auth_guard.php): solo rol Administrador.
 
 require_once __DIR__ . '/../config/conexion.php';
 require_once __DIR__ . '/../includes/funciones.php';
@@ -13,6 +13,8 @@ $titulo_pagina      = 'Editar producto | SoleMate';
 $descripcion_pagina = 'Panel de administración de SoleMate: modificación de un producto.';
 $pagina_activa      = '';
 $ruta_base          = '../';
+require_once __DIR__ . '/../includes/auth_guard.php'; // TP8: exige haber iniciado sesión
+verificarRol('Administrador');                        // TP8: y tener el rol Administrador
 $texto_boton        = 'Guardar cambios';
 
 $errores = [];

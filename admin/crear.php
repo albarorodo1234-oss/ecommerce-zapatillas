@@ -2,7 +2,7 @@
 // admin/crear.php
 // Alta de productos (CREATE del CRUD): muestra el formulario y, al enviarlo
 // por POST, valida los datos y los guarda con una consulta preparada.
-// TP8: aquí se agregará el guardián de rutas (solo rol Administrador).
+// TP8: protegido por el guardián de rutas (auth_guard.php): solo rol Administrador.
 
 require_once __DIR__ . '/../config/conexion.php';
 require_once __DIR__ . '/../includes/funciones.php';
@@ -12,6 +12,8 @@ $titulo_pagina      = 'Nuevo producto | SoleMate';
 $descripcion_pagina = 'Panel de administración de SoleMate: alta de un producto.';
 $pagina_activa      = '';
 $ruta_base          = '../';
+require_once __DIR__ . '/../includes/auth_guard.php'; // TP8: exige haber iniciado sesión
+verificarRol('Administrador');                        // TP8: y tener el rol Administrador
 $texto_boton        = 'Guardar producto';
 
 $datos   = producto_vacio();

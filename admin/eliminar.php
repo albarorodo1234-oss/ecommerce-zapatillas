@@ -3,10 +3,14 @@
 // Baja de productos (DELETE del CRUD). No muestra ninguna página: recibe el
 // id por POST desde el botón "Eliminar" del panel, borra el producto con una
 // consulta preparada y vuelve al listado con el resultado en ?status=.
-// TP8: aquí se agregará el guardián de rutas (solo rol Administrador).
+// TP8: protegido por el guardián de rutas (auth_guard.php): solo rol Administrador.
 
 require_once __DIR__ . '/../config/conexion.php';
 require_once __DIR__ . '/../includes/funciones.php';
+
+$ruta_base = '../'; // Esta página está en admin/: el guardián redirige una carpeta arriba.
+require_once __DIR__ . '/../includes/auth_guard.php'; // TP8: exige haber iniciado sesión
+verificarRol('Administrador');                        // TP8: y tener el rol Administrador
 
 // 1. Solo se acepta POST: si alguien abre esta dirección directo
 //    (o la sigue desde un enlace), no se borra nada.
