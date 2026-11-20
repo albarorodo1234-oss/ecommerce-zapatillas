@@ -1,4 +1,6 @@
 <?php
+// TP8: para finalizar la compra hay que iniciar sesión (cualquier rol).
+require_once __DIR__ . '/includes/auth_guard.php';
 $titulo_pagina      = "Finalizar compra | SoleMate";
 $descripcion_pagina = "Completá tus datos de envío, elegí cómo pagar y confirmá tu pedido de zapatillas importadas en SoleMate.";
 require_once 'includes/header.php';

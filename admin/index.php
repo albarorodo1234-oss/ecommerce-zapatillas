@@ -2,8 +2,7 @@
 // admin/index.php
 // Panel de administración de productos: listado principal (READ del CRUD).
 // Desde aquí se accede a crear, editar y eliminar productos.
-// TP8: al principio de este archivo se agregará el guardián de rutas
-// (auth_guard.php) para que solo entre el rol Administrador.
+// TP8: protegido por el guardián de rutas (auth_guard.php): solo rol Administrador.
 
 require_once __DIR__ . '/../config/conexion.php';
 require_once __DIR__ . '/../includes/funciones.php';
@@ -12,6 +11,8 @@ $titulo_pagina      = 'Panel de productos | SoleMate';
 $descripcion_pagina = 'Panel de administración de SoleMate: alta, modificación y baja de productos.';
 $pagina_activa      = '';
 $ruta_base          = '../'; // Esta página está en admin/: las rutas suben una carpeta.
+require_once __DIR__ . '/../includes/auth_guard.php'; // TP8: exige haber iniciado sesión
+verificarRol('Administrador');                        // TP8: y tener el rol Administrador
 
 // Mensajes de resultado: crear.php, editar.php y eliminar.php redirigen
 // aquí con ?status=... para informar qué pasó.
