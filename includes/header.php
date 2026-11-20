@@ -6,6 +6,7 @@
 //   $descripcion_pagina  (opcional: descripción para buscadores)
 
 require_once __DIR__ . '/../config/env.php';
+require_once __DIR__ . '/sesion.php'; // Inicia la sesión segura (TP8)
 
 // Si la página no define un valor, se usa uno por defecto
 $titulo_pagina      = $titulo_pagina ?? APP_NAME;
