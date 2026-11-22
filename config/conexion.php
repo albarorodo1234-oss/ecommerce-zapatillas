@@ -33,5 +33,16 @@ try {
 } catch (PDOException $e) {
     error_log('Error de conexión a la base de datos: ' . $e->getMessage());
     http_response_code(500);
+
+    // TP9: si quien incluye este archivo es un endpoint JSON (como api/productos.php),
+    // define la constante RESPUESTA_JSON antes del require. En ese caso el error
+    // también se responde en JSON, para que JavaScript pueda leerlo con response.json().
+    if (defined('RESPUESTA_JSON')) {
+        header('Content-Type: application/json; charset=utf-8');
+        die(json_encode([
+            'status'  => 'error',
+            'message' => 'No se pudo establecer la conexión con la base de datos.',
+        ], JSON_UNESCAPED_UNICODE));
+    }
     die('Error crítico: no se pudo establecer la conexión con la base de datos.');
 }
