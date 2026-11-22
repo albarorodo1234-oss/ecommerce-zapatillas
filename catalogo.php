@@ -2,183 +2,56 @@
 // catalogo.php
 // Catálogo público: los productos se leen de la base de datos (TP7).
 // Los filtros GET del TP5 (búsqueda, talla, precio, marca y origen) se
-// validan igual que antes y ahora se convierten en condiciones de una
-// consulta preparada.
+// validan y se convierten en condiciones de una consulta preparada.
+// TP9: la validación y la consulta se movieron a includes/catalogo_consulta.php,
+// que también usa el endpoint api/productos.php. Esta página sigue
+// funcionando sola (sin JavaScript); con JavaScript, js/main.js pide los
+// productos a la API y actualiza el listado sin recargar la página.
 
 require_once 'config/conexion.php';
-require_once 'includes/funciones.php';
+require_once 'includes/catalogo_consulta.php'; // TP9: lógica compartida con la API
 
 $titulo_pagina      = "Catálogo de zapatillas importadas | SoleMate";
 $descripcion_pagina = "Explorá el catálogo de SoleMate: zapatillas Nike, Jordan, Adidas y New Balance importadas de Chile y Bolivia. Filtrá por talla, precio, marca y origen.";
 $pagina_activa      = "catalogo";
-$busqueda           = dato_get('q');
 
-// Valores permitidos para los filtros.
-$tallas_disponibles = [38, 39, 40, 41, 42, 43, 44];
-$precio_minimo      = 50000;
-$precio_maximo      = 300000;
-$precio_paso        = 10000;
-
-// Orden del listado: el ORDER BY no admite :parametros, por eso cada
-// opción permitida se traduce a un fragmento SQL fijo (lista blanca).
-$ordenes_disponibles = [
-    'menor' => 'p.precio ASC',
-    'mayor' => 'p.precio DESC',
-];
-
-$productos_filtrados = [];
-$marcas_disponibles  = [];
+$productos_filtrados  = [];
+$marcas_disponibles   = [];
 $origenes_disponibles = [];
-$error_catalogo      = false;
+$error_catalogo       = false;
 
+// 1. Marcas y orígenes para los filtros (tablas maestras).
 try {
-    // Marcas y orígenes para los filtros, desde las tablas maestras: [id => nombre].
-    $stmt = $pdo->prepare('SELECT id, nombre FROM marcas ORDER BY nombre');
-    $stmt->execute();
-    $marcas_disponibles = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-
-    $stmt = $pdo->prepare('SELECT id, nombre FROM origenes ORDER BY nombre');
-    $stmt->execute();
-    $origenes_disponibles = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+    [$marcas_disponibles, $origenes_disponibles] = catalogo_maestros($pdo);
 } catch (PDOException $e) {
     error_log('Error al leer los filtros del catálogo: ' . $e->getMessage());
     $error_catalogo = true;
 }
 
-// ----- Lectura y validación de los datos que llegan por GET (igual que en el TP5) -----
-$errores_filtros = [];
+// 2. Lectura y validación de los filtros que llegan por GET.
+[$filtros, $errores_filtros] = catalogo_leer_filtros($marcas_disponibles, $origenes_disponibles);
 
-// Búsqueda de texto (viene del buscador del menú): máximo 60 caracteres.
-if (mb_strlen($busqueda) > 60) {
-    $busqueda = mb_substr($busqueda, 0, 60);
-    $errores_filtros['q'] = 'La búsqueda se acortó a 60 caracteres.';
-}
-
-// Tallas: cada valor debe ser un número entero de la lista permitida.
-$tallas_elegidas = [];
-foreach (dato_get_lista('talla') as $valor) {
-    $talla = filter_var(trim($valor), FILTER_VALIDATE_INT);
-    if ($talla !== false && in_array($talla, $tallas_disponibles, true)) {
-        $tallas_elegidas[] = $talla;
-    } else {
-        $errores_filtros['talla'] = 'Se ignoró una talla que no existe.';
-    }
-}
-
-// Marcas: cada valor debe ser el id de una marca de la base.
-$marcas_elegidas = [];
-foreach (dato_get_lista('marca') as $valor) {
-    $valor = trim($valor);
-    if (ctype_digit($valor) && isset($marcas_disponibles[(int) $valor])) {
-        $marcas_elegidas[] = (int) $valor;
-    } else {
-        $errores_filtros['marca'] = 'Se ignoró una marca que no existe.';
-    }
-}
-
-// Orígenes: cada valor debe ser el id de un origen de la base.
-$origenes_elegidos = [];
-foreach (dato_get_lista('origen') as $valor) {
-    $valor = trim($valor);
-    if (ctype_digit($valor) && isset($origenes_disponibles[(int) $valor])) {
-        $origenes_elegidos[] = (int) $valor;
-    } else {
-        $errores_filtros['origen'] = 'Se ignoró un origen que no existe.';
-    }
-}
-
-// Precio máximo: un entero entre el mínimo y el máximo del deslizador.
-$precio_tope     = $precio_maximo;
-$filtrar_precio  = false;
-$precio_recibido = dato_get('precio_max');
-if ($precio_recibido !== '') {
-    $precio_valido = filter_var($precio_recibido, FILTER_VALIDATE_INT, [
-        'options' => ['min_range' => $precio_minimo, 'max_range' => $precio_maximo],
-    ]);
-    if ($precio_valido === false) {
-        $errores_filtros['precio_max'] = 'Se ignoró un precio máximo fuera del rango permitido.';
-    } else {
-        $precio_tope    = $precio_valido;
-        $filtrar_precio = true;
-    }
-}
-
-// Orden: solo se acepta una clave de la lista blanca.
-$orden = dato_get('orden');
-if ($orden !== '' && !isset($ordenes_disponibles[$orden])) {
-    $orden = '';
-    $errores_filtros['orden'] = 'Se ignoró un orden que no existe.';
-}
-
-// Arma una lista de marcadores (:prefijo0, :prefijo1, ...) para un IN (...)
-// y agrega cada valor a $parametros. Así ningún dato se escribe dentro del SQL.
-function marcadores_in(string $prefijo, array $valores, array &$parametros): string
-{
-    $marcadores = [];
-    foreach ($valores as $i => $valor) {
-        $marcador              = ':' . $prefijo . $i;
-        $marcadores[]          = $marcador;
-        $parametros[$marcador] = $valor;
-    }
-    return implode(', ', $marcadores);
-}
-
-// ----- READ: consulta preparada con los filtros elegidos -----
+// 3. READ: consulta preparada con los filtros válidos.
 if (!$error_catalogo) {
-    // Solo productos visibles. Cada filtro activo agrega una condición.
-    $condiciones = ['p.activo = 1'];
-    $parametros  = [];
-
-    if ($busqueda !== '') {
-        // Se escapan % y _ para que se busquen como texto y no como comodines de LIKE.
-        // Cada marcador se usa una sola vez (requisito de las consultas preparadas nativas).
-        $texto = '%' . addcslashes($busqueda, '%_\\') . '%';
-        $condiciones[] = '(p.nombre LIKE :q_nombre OR m.nombre LIKE :q_marca OR c.nombre LIKE :q_categoria)';
-        $parametros[':q_nombre']    = $texto;
-        $parametros[':q_marca']     = $texto;
-        $parametros[':q_categoria'] = $texto;
-    }
-    if (!empty($marcas_elegidas)) {
-        $condiciones[] = 'p.marca_id IN (' . marcadores_in('marca', $marcas_elegidas, $parametros) . ')';
-    }
-    if (!empty($origenes_elegidos)) {
-        $condiciones[] = 'p.origen_id IN (' . marcadores_in('origen', $origenes_elegidos, $parametros) . ')';
-    }
-    if (!empty($tallas_elegidas)) {
-        // La talla está en producto_talle (stock por talle): el producto
-        // entra si tiene stock en alguna de las tallas elegidas.
-        $condiciones[] = 'EXISTS (SELECT 1 FROM producto_talle AS pt
-                                  WHERE pt.producto_id = p.id
-                                    AND pt.stock > 0
-                                    AND pt.talle IN (' . marcadores_in('talla', $tallas_elegidas, $parametros) . '))';
-    }
-    if ($filtrar_precio) {
-        $condiciones[] = 'p.precio <= :precio_max';
-        $parametros[':precio_max'] = $precio_tope;
-    }
-
-    $sql = 'SELECT p.id, p.nombre, p.precio, p.imagen, p.alt,
-                   c.nombre AS categoria, o.nombre AS origen,
-                   (SELECT MIN(pt.talle) FROM producto_talle AS pt
-                     WHERE pt.producto_id = p.id AND pt.stock > 0) AS talle_min,
-                   (SELECT MAX(pt.talle) FROM producto_talle AS pt
-                     WHERE pt.producto_id = p.id AND pt.stock > 0) AS talle_max
-            FROM productos AS p
-            INNER JOIN marcas     AS m ON p.marca_id     = m.id
-            INNER JOIN categorias AS c ON p.categoria_id = c.id
-            INNER JOIN origenes   AS o ON p.origen_id    = o.id
-            WHERE ' . implode(' AND ', $condiciones) . '
-            ORDER BY ' . ($ordenes_disponibles[$orden] ?? 'p.id ASC');
-
     try {
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($parametros);
-        $productos_filtrados = $stmt->fetchAll();
+        $productos_filtrados = catalogo_buscar($pdo, $filtros);
     } catch (PDOException $e) {
         error_log('Error al leer el catálogo: ' . $e->getMessage());
         $error_catalogo = true;
     }
 }
+
+// Variables que usa el HTML (mismos nombres que en el TP7).
+$busqueda           = $filtros['q'];
+$tallas_elegidas    = $filtros['tallas'];
+$marcas_elegidas    = $filtros['marcas'];
+$origenes_elegidos  = $filtros['origenes'];
+$orden              = $filtros['orden'];
+$precio_tope        = $filtros['precio_max'] ?? CATALOGO_PRECIO_MAXIMO;
+$tallas_disponibles = CATALOGO_TALLAS;
+$precio_minimo      = CATALOGO_PRECIO_MINIMO;
+$precio_maximo      = CATALOGO_PRECIO_MAXIMO;
+$precio_paso        = CATALOGO_PRECIO_PASO;
 
 require_once 'includes/header.php';
 ?>
@@ -194,7 +67,8 @@ require_once 'includes/header.php';
         <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
           <div>
             <h1 class="page-title">Catálogo de Productos</h1>
-            <p class="results-count mb-0">
+            <!-- TP9: id para que js/main.js actualice el contador sin recargar -->
+            <p class="results-count mb-0" id="contador-resultados" aria-live="polite">
               Mostrando <?= count($productos_filtrados) ?> <?= count($productos_filtrados) === 1 ? 'producto' : 'productos' ?>
               <?php if ($busqueda !== ''): ?>
                 · Buscaste: <strong><?= e($busqueda) ?></strong>
@@ -204,7 +78,7 @@ require_once 'includes/header.php';
           <div>
             <!-- form="filtros": este select pertenece al formulario de filtros aunque esté fuera de él -->
             <label class="visually-hidden" for="orden">Ordenar productos</label>
-            <select class="form-select form-select-sm sort" id="orden" name="orden" form="filtros" onchange="this.form.submit()">
+            <select class="form-select form-select-sm sort" id="orden" name="orden" form="filtros" onchange="this.form.requestSubmit()">
               <option value="">Ordenar por precio</option>
               <option value="menor" <?= $orden === 'menor' ? 'selected' : '' ?>>Menor precio</option>
               <option value="mayor" <?= $orden === 'mayor' ? 'selected' : '' ?>>Mayor precio</option>
@@ -212,16 +86,19 @@ require_once 'includes/header.php';
           </div>
         </div>
 
-        <?php if (!empty($errores_filtros)): ?>
-          <div class="alert alert-warning" role="alert">
-            <strong>Ajustamos tu búsqueda:</strong>
-            <ul class="mb-0">
-              <?php foreach ($errores_filtros as $aviso): ?>
-                <li><?= e($aviso) ?></li>
-              <?php endforeach; ?>
-            </ul>
-          </div>
-        <?php endif; ?>
+        <!-- TP9: js/main.js usa este contenedor para los avisos de la API (400 y errores) -->
+        <div id="avisos-catalogo">
+          <?php if (!empty($errores_filtros)): ?>
+            <div class="alert alert-warning" role="alert">
+              <strong>Ajustamos tu búsqueda:</strong>
+              <ul class="mb-0">
+                <?php foreach ($errores_filtros as $aviso): ?>
+                  <li><?= e($aviso) ?></li>
+                <?php endforeach; ?>
+              </ul>
+            </div>
+          <?php endif; ?>
+        </div>
 
         <div class="row g-4">
           <!-- Filtros -->
@@ -293,29 +170,24 @@ require_once 'includes/header.php';
           <section class="col-lg-9" aria-labelledby="listado-titulo">
             <h2 id="listado-titulo" class="visually-hidden">Listado de productos</h2>
 
-            <?php if ($error_catalogo): ?>
-              <div class="alert alert-danger" role="alert">
-                No pudimos cargar el catálogo en este momento. Intentá nuevamente más tarde.
-              </div>
-            <?php elseif (empty($productos_filtrados)): ?>
-              <div class="alert alert-info" role="status">
-                No encontramos zapatillas con esos filtros. Probá con menos filtros o
-                <a href="catalogo.php" class="alert-link">limpiá la búsqueda</a>.
-              </div>
-            <?php endif; ?>
+            <!-- TP9: js/main.js muestra aquí "Cargando…", "sin resultados" o el error -->
+            <div id="estado-catalogo">
+              <?php if ($error_catalogo): ?>
+                <div class="alert alert-danger" role="alert">
+                  No pudimos cargar el catálogo en este momento. Intentá nuevamente más tarde.
+                </div>
+              <?php elseif (empty($productos_filtrados)): ?>
+                <div class="alert alert-info" role="status">
+                  No encontramos zapatillas con esos filtros. Probá con menos filtros o
+                  <a href="catalogo.php" class="alert-link">limpiá la búsqueda</a>.
+                </div>
+              <?php endif; ?>
+            </div>
 
-            <div class="row g-3">
+            <!-- TP9: js/main.js reemplaza el contenido de esta grilla con los datos JSON -->
+            <div class="row g-3" id="grilla-productos">
               <?php foreach ($productos_filtrados as $producto): ?>
-                <?php
-                // Talles con stock: "ARG 38–40", "ARG 41" o, si no tiene stock cargado, "Consultar talle".
-                if ($producto['talle_min'] === null) {
-                    $texto_talles = 'Consultar talle';
-                } elseif ($producto['talle_min'] == $producto['talle_max']) {
-                    $texto_talles = 'ARG ' . $producto['talle_min'];
-                } else {
-                    $texto_talles = 'ARG ' . $producto['talle_min'] . '–' . $producto['talle_max'];
-                }
-                ?>
+                <?php $texto_talles = catalogo_texto_talles($producto); // "ARG 38–40", "ARG 41" o "Consultar talle" ?>
                 <div class="col-12 col-sm-6 col-xl-3">
                   <article class="card tarjeta product-card">
                     <?php if (!empty($producto['imagen'])): ?>
@@ -350,6 +222,34 @@ require_once 'includes/header.php';
                 </div>
               <?php endforeach; ?>
             </div>
+
+            <!-- TP9: plantilla de una tarjeta. El navegador no la muestra: js/main.js
+                 la copia por cada producto del JSON y completa los datos con textContent
+                 (nunca con innerHTML, para evitar XSS). Debe tener el mismo diseño que
+                 las tarjetas de arriba. -->
+            <template id="plantilla-producto">
+              <div class="col-12 col-sm-6 col-xl-3">
+                <article class="card tarjeta product-card">
+                  <img src="" class="card-img-top" alt="" loading="lazy" />
+                  <div class="card-body">
+                    <div class="meta">
+                      <span class="badge-origen"></span>
+                      <span class="talla-ref"></span>
+                    </div>
+                    <h3 class="product-name">
+                      <a class="stretched-link" href=""></a>
+                    </h3>
+                    <p class="product-type"></p>
+                    <div class="price-row">
+                      <p class="price"></p>
+                      <button type="button" class="btn btn-acento btn-sm btn-add" aria-label="">
+                        Añadir
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </template>
           </section>
         </div>
       </div>
