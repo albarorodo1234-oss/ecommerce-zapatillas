@@ -1,0 +1,4 @@
+# app/.htaccess
+# TP10: los Modelos, Controladores y Vistas no se abren directo desde el
+# navegador; solo se usan a través de catalogo.php, producto.php y api/productos.php.
+Require all denied
