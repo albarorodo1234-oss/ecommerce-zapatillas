@@ -1,6 +1,6 @@
 # SoleMate – Ecommerce de zapatillas importadas
 
-Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en seis etapas:
+Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en siete etapas:
 
 - **TP N° 3:** maquetación front-end en HTML5 semántico, CSS3 y Bootstrap, con Git Workflow, SEO y accesibilidad.
 - **TP N° 4:** _Migración a PHP, Modularización (SSI) y Renderizado Server-Side (SSR)_. Las 10 vistas pasaron de HTML estático a PHP, con plantillas reutilizables, título y menú dinámicos, y variables de entorno.
@@ -8,6 +8,7 @@ Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y
 - **TP N° 6:** _Diseño y creación del esquema relacional en MySQL_. Base de datos `solemate_db` normalizada hasta la 3FN, con su script de creación (`schema.sql`) y consultas de prueba CRUD (`consultas.sql`). Todo el desarrollo está en la carpeta [`tp6/`](tp6/).
 - **TP N° 7:** _Persistencia y conexión PHP-MySQL segura_. El sitio se conecta a `solemate_db` con PDO: panel de administración con el CRUD de productos (carpeta [`admin/`](admin/)) y catálogo y detalle de producto leídos de la base, con consultas preparadas y protección XSS. Se desarrolló en la aplicación principal.
 - **TP N° 8:** _Manejo de estado, sesiones y autenticación_. Registro, inicio y cierre de sesión con sesiones de PHP y contraseñas cifradas con bcrypt, guardián de rutas y control de acceso por rol: el panel `admin/` solo lo usa el Administrador. Se desarrolló en la aplicación principal.
+- **TP N° 9:** _Comunicación asincrónica y APIs (AJAX & JSON)_. El catálogo busca, filtra y ordena **sin recargar la página**: JavaScript pide los productos con Fetch API (`async/await`) a un endpoint PHP que responde JSON con códigos HTTP (carpeta [`api/`](api/)), y actualiza solo la grilla. Se desarrolló en la aplicación principal.
 
 ## Enlaces
 
@@ -18,6 +19,7 @@ Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y
 - **Desarrollo del TP N° 6:** [carpeta tp6/](tp6/) · [normalización](tp6/NORMALIZACION.md) · [sección del README](#clase-6-diseño-y-creación-del-esquema-relacional-en-mysql-tp-n-6)
 - **Desarrollo del TP N° 7:** [conexión](config/conexion.php) · [panel admin/](admin/) · [sección del README](#clase-7-persistencia-y-conexión-php-mysql-segura-tp-n-7)
 - **Desarrollo del TP N° 8:** [guardián de rutas](includes/auth_guard.php) · [login](login.php) · [registro](registro.php) · [sección del README](#clase-8-manejo-de-estado-sesiones-y-autenticación-tp-n-8)
+- **Desarrollo del TP N° 9:** [endpoint api/productos.php](api/productos.php) · [js/main.js](js/main.js) · [lógica compartida](includes/catalogo_consulta.php) · [sección del README](#clase-9-comunicación-asincrónica-y-apis-con-ajax-y-json-tp-n-9)
 
 > **Nota sobre la publicación:** en el TP N° 3 el sitio era HTML estático y se publicaba en GitHub Pages. Desde el TP N° 4 las vistas son `.php` y necesitan un servidor con PHP, que GitHub Pages no ofrece. Por eso el sitio se ejecuta en local con XAMPP (ver [Cómo ejecutarlo localmente](#cómo-ejecutarlo-localmente)).
 
@@ -406,51 +408,51 @@ Un producto sin ventas se elimina correctamente:
 
 El sitio incorporó **registro, inicio y cierre de sesión** con sesiones de PHP, contraseñas cifradas con **bcrypt** y un **guardián de rutas** con control de acceso por rol. Igual que el TP N° 7, se desarrolló **en la aplicación principal**: el panel `admin/` que en el TP N° 7 estaba abierto a cualquier visitante ahora solo lo puede usar el rol Administrador.
 
-| Requisito de la consigna                         | Cómo se resolvió                                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Base de datos (`usuarios`)**                   | Se usa la tabla `usuarios` del TP N° 6, que ya tenía `id`, `nombre`, `email` único, `password_hash` (VARCHAR 255) y `created_at`. El rol se guarda en `rol_id`, clave foránea a la tabla `roles` (ver la equivalencia más abajo). No hizo falta modificar la base.                                                                                                   |
-| **Registro (`registro.php`)**                    | Validación estricta en el servidor (el nombre solo admite letras, espacios, apóstrofo, punto y guion; correo con `filter_var()`; contraseña de 8 a 72 caracteres repetida dos veces; aceptación de términos). Verifica con un `SELECT` preparado que el correo no exista, cifra con `password_hash($password, PASSWORD_BCRYPT)` e inserta con un `INSERT` preparado. |
-| **Autenticación (`login.php`)**                  | Busca al usuario por correo (con un `JOIN` a `roles`) y compara con `password_verify()`. Si es correcto: `session_start()` (en `includes/sesion.php`), `session_regenerate_id(true)`, guarda `$_SESSION['usuario_id']`, `$_SESSION['usuario_nombre']` y `$_SESSION['rol']`, y redirige al panel (Administrador) o a `mi-cuenta.php` (Cliente).                    |
-| **Guardián de rutas (`includes/auth_guard.php`)** | Script reutilizable que verifica `isset($_SESSION['usuario_id'])` y, si no hay sesión, redirige a `login.php?error=acceso_denegado`. La función `verificarRol('Administrador')` responde **403 Prohibido** a cualquier otro rol.                                                                                                                                      |
-| **Vistas protegidas**                            | Solo rol Administrador: las 4 páginas del panel (`admin/index.php`, `crear.php`, `editar.php` y `eliminar.php`). Cualquier usuario con sesión: `mi-cuenta.php` y `checkout.php`.                                                                                                                                                                                     |
-| **Cierre de sesión (`logout.php`)**              | Vacía `$_SESSION`, borra la cookie de sesión del navegador (`setcookie()` con vencimiento en el pasado), destruye la sesión con `session_destroy()` y redirige al login.                                                                                                                                                                                           |
-| **Cookies de sesión seguras**                    | `includes/sesion.php` configura `cookie_httponly`, `use_only_cookies`, `use_strict_mode`, `cookie_samesite = Lax` y `cookie_secure` cuando el sitio se sirve por HTTPS.                                                                                                                                                                                            |
-| **Integración en la aplicación principal**       | Todo funciona con las plantillas del sitio. La barra superior cambia según la sesión: el ícono del panel solo lo ve el Administrador, y con la sesión iniciada aparecen "Mi cuenta" (con el nombre) y "Cerrar sesión".                                                                                                                                              |
+| Requisito de la consigna                          | Cómo se resolvió                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Base de datos (`usuarios`)**                    | Se usa la tabla `usuarios` del TP N° 6, que ya tenía `id`, `nombre`, `email` único, `password_hash` (VARCHAR 255) y `created_at`. El rol se guarda en `rol_id`, clave foránea a la tabla `roles` (ver la equivalencia más abajo). No hizo falta modificar la base.                                                                                                   |
+| **Registro (`registro.php`)**                     | Validación estricta en el servidor (el nombre solo admite letras, espacios, apóstrofo, punto y guion; correo con `filter_var()`; contraseña de 8 a 72 caracteres repetida dos veces; aceptación de términos). Verifica con un `SELECT` preparado que el correo no exista, cifra con `password_hash($password, PASSWORD_BCRYPT)` e inserta con un `INSERT` preparado. |
+| **Autenticación (`login.php`)**                   | Busca al usuario por correo (con un `JOIN` a `roles`) y compara con `password_verify()`. Si es correcto: `session_start()` (en `includes/sesion.php`), `session_regenerate_id(true)`, guarda `$_SESSION['usuario_id']`, `$_SESSION['usuario_nombre']` y `$_SESSION['rol']`, y redirige al panel (Administrador) o a `mi-cuenta.php` (Cliente).                       |
+| **Guardián de rutas (`includes/auth_guard.php`)** | Script reutilizable que verifica `isset($_SESSION['usuario_id'])` y, si no hay sesión, redirige a `login.php?error=acceso_denegado`. La función `verificarRol('Administrador')` responde **403 Prohibido** a cualquier otro rol.                                                                                                                                     |
+| **Vistas protegidas**                             | Solo rol Administrador: las 4 páginas del panel (`admin/index.php`, `crear.php`, `editar.php` y `eliminar.php`). Cualquier usuario con sesión: `mi-cuenta.php` y `checkout.php`.                                                                                                                                                                                     |
+| **Cierre de sesión (`logout.php`)**               | Vacía `$_SESSION`, borra la cookie de sesión del navegador (`setcookie()` con vencimiento en el pasado), destruye la sesión con `session_destroy()` y redirige al login.                                                                                                                                                                                             |
+| **Cookies de sesión seguras**                     | `includes/sesion.php` configura `cookie_httponly`, `use_only_cookies`, `use_strict_mode`, `cookie_samesite = Lax` y `cookie_secure` cuando el sitio se sirve por HTTPS.                                                                                                                                                                                              |
+| **Integración en la aplicación principal**        | Todo funciona con las plantillas del sitio. La barra superior cambia según la sesión: el ícono del panel solo lo ve el Administrador, y con la sesión iniciada aparecen "Mi cuenta" (con el nombre) y "Cerrar sesión".                                                                                                                                               |
 
 ### Equivalencia con la estructura recomendada
 
 La consigna recomienda una tabla `usuarios` con las columnas `password` y `rol` (texto `'admin'` / `'usuario'`). Se conservó el diseño normalizado del TP N° 6, que cumple la misma función:
 
-| Consigna                        | SoleMate (`solemate_db`)                                              | Motivo                                                                                                                                                         |
-| ------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `password` VARCHAR(255)         | `password_hash` VARCHAR(255)                                          | El nombre deja claro que guarda un hash y nunca la contraseña.                                                                                                |
-| `rol` VARCHAR (`'admin'` / `'usuario'`) | `rol_id` → tabla `roles` (`Administrador` / `Cliente`)        | Diseño en 3FN del TP N° 6: los nombres de rol no se repiten en cada fila y no se pueden escribir mal. En el login, un `JOIN` trae el nombre del rol para `$_SESSION['rol']`. |
-| `admin_panel.php`               | `admin/index.php`                                                     | El panel del TP N° 7 ya existía con ese nombre; se protege con `verificarRol('Administrador')`.                                                                |
-| `auth_guard.php`                | `includes/auth_guard.php`                                             | Va junto a las demás piezas reutilizables (`header.php`, `nav.php`, `funciones.php`).                                                                          |
+| Consigna                                | SoleMate (`solemate_db`)                               | Motivo                                                                                                                                                                       |
+| --------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `password` VARCHAR(255)                 | `password_hash` VARCHAR(255)                           | El nombre deja claro que guarda un hash y nunca la contraseña.                                                                                                               |
+| `rol` VARCHAR (`'admin'` / `'usuario'`) | `rol_id` → tabla `roles` (`Administrador` / `Cliente`) | Diseño en 3FN del TP N° 6: los nombres de rol no se repiten en cada fila y no se pueden escribir mal. En el login, un `JOIN` trae el nombre del rol para `$_SESSION['rol']`. |
+| `admin_panel.php`                       | `admin/index.php`                                      | El panel del TP N° 7 ya existía con ese nombre; se protege con `verificarRol('Administrador')`.                                                                              |
+| `auth_guard.php`                        | `includes/auth_guard.php`                              | Va junto a las demás piezas reutilizables (`header.php`, `nav.php`, `funciones.php`).                                                                                        |
 
 ### Archivos del módulo
 
-| Archivo                   | Función                                                                                                         |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Archivo                   | Función                                                                                                                |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `includes/sesion.php`     | Inicia la sesión con la configuración segura de la cookie. Lo incluyen `header.php`, el login, el logout y el guardián |
-| `registro.php`            | Registro de clientes con validación, control de correo duplicado y `PASSWORD_BCRYPT`                            |
-| `login.php`               | Inicio de sesión con `password_verify()`, `session_regenerate_id(true)` y redirección según el rol              |
-| `logout.php`              | Cierre de sesión: vacía `$_SESSION`, borra la cookie y destruye la sesión                                       |
-| `includes/auth_guard.php` | Guardián de rutas (autenticación) y `verificarRol()` (autorización)                                             |
-| `includes/prohibido.php`  | Página "403 Acceso prohibido" con el diseño del sitio                                                           |
-| `mi-cuenta.php`           | Vista protegida con los datos de la cuenta; destino del cliente tras el login                                   |
-| `checkout.php`            | Exige sesión iniciada para finalizar la compra                                                                  |
-| `includes/nav.php`        | Accesos de la barra según la sesión y el rol                                                                    |
-| `admin/*.php`             | Las 4 páginas del panel incluyen el guardián y `verificarRol('Administrador')`                                  |
+| `registro.php`            | Registro de clientes con validación, control de correo duplicado y `PASSWORD_BCRYPT`                                   |
+| `login.php`               | Inicio de sesión con `password_verify()`, `session_regenerate_id(true)` y redirección según el rol                     |
+| `logout.php`              | Cierre de sesión: vacía `$_SESSION`, borra la cookie y destruye la sesión                                              |
+| `includes/auth_guard.php` | Guardián de rutas (autenticación) y `verificarRol()` (autorización)                                                    |
+| `includes/prohibido.php`  | Página "403 Acceso prohibido" con el diseño del sitio                                                                  |
+| `mi-cuenta.php`           | Vista protegida con los datos de la cuenta; destino del cliente tras el login                                          |
+| `checkout.php`            | Exige sesión iniciada para finalizar la compra                                                                         |
+| `includes/nav.php`        | Accesos de la barra según la sesión y el rol                                                                           |
+| `admin/*.php`             | Las 4 páginas del panel incluyen el guardián y `verificarRol('Administrador')`                                         |
 
 ### Acceso a cada página según el rol
 
-| Página                              | Visitante sin sesión            | Cliente                  | Administrador |
-| ----------------------------------- | ------------------------------- | ------------------------ | ------------- |
-| Tienda (inicio, catálogo, producto…) | ✅                              | ✅                       | ✅            |
-| `registro.php` y `login.php`        | ✅                              | Redirige a su página     | Redirige al panel |
-| `mi-cuenta.php` y `checkout.php`    | ➡️ `login.php?error=acceso_denegado` | ✅                  | ✅            |
-| `admin/` (listado, alta, edición y baja) | ➡️ `login.php?error=acceso_denegado` | ⛔ 403 Prohibido | ✅            |
+| Página                                   | Visitante sin sesión                 | Cliente              | Administrador     |
+| ---------------------------------------- | ------------------------------------ | -------------------- | ----------------- |
+| Tienda (inicio, catálogo, producto…)     | ✅                                   | ✅                   | ✅                |
+| `registro.php` y `login.php`             | ✅                                   | Redirige a su página | Redirige al panel |
+| `mi-cuenta.php` y `checkout.php`         | ➡️ `login.php?error=acceso_denegado` | ✅                   | ✅                |
+| `admin/` (listado, alta, edición y baja) | ➡️ `login.php?error=acceso_denegado` | ⛔ 403 Prohibido     | ✅                |
 
 ### Decisiones de diseño
 
@@ -512,6 +514,156 @@ El Administrador entra directo al panel, y solo él ve el acceso al panel en la 
 
 ![Panel del administrador](docs/tp8/tp8-11-admin-panel.png)
 
+## Clase 9: Comunicación asincrónica y APIs con AJAX y JSON (TP N° 9)
+
+El catálogo pasó del modelo **sincrónico** (cada búsqueda o filtro recargaba la página completa) a una interacción **asincrónica**: JavaScript pide los productos en segundo plano con **Fetch API** a un **endpoint PHP que responde JSON**, y actualiza solo la grilla de tarjetas y el contador, **sin recargar el navegador**. Igual que los TP N° 7 y N° 8, se desarrolló **en la aplicación principal**.
+
+| Requisito de la consigna               | Cómo se resolvió                                                                                                                                                                                                                                    |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Endpoint PHP independiente**         | `api/productos.php`: no imprime HTML, solo datos. Lee los productos de `solemate_db` con **PDO y consultas preparadas**, usando la misma lógica que `catalogo.php` (`includes/catalogo_consulta.php`).                                              |
+| **Encabezado JSON**                    | `header('Content-Type: application/json; charset=utf-8')` al principio del endpoint.                                                                                                                                                                |
+| **Conversión con `json_encode()`**     | Las filas (arreglos asociativos de PHP) se convierten con `json_encode()`, con `JSON_UNESCAPED_UNICODE` y `JSON_UNESCAPED_SLASHES` para que el texto quede legible. El id y el precio se envían como **números** (PDO los entrega como texto).      |
+| **Códigos de estado HTTP**             | `200 OK` (datos), `400 Bad Request` (filtros o id inválidos), `404 Not Found` (producto inexistente), `405 Method Not Allowed` (otro método que no sea GET) y `500 Internal Server Error` (fallo de la base). Se emiten con `http_response_code()`. |
+| **Evento del usuario**                 | `input` en el buscador del menú (con _debounce_ de 300 ms), `submit` del buscador y del formulario de filtros cancelado con `e.preventDefault()`, y `change` en tallas, precio, marcas y origen.                                                    |
+| **Petición asincrónica con Fetch API** | `async function cargarProductos()` con `await fetch('api/productos.php?…')` y `await response.json()` (`js/main.js`).                                                                                                                               |
+| **Manejo de errores**                  | Bloque `try...catch`: se revisa `response.ok` (un 400 o un 500 no hacen fallar a `fetch`) y se distinguen tres casos: filtros inválidos (400), error del servidor (500) y falla de red.                                                             |
+| **Manipulación dinámica del DOM**      | `productos.map(crearTarjeta)` convierte cada producto del JSON en una tarjeta copiada de una `<template>`, y `grilla.replaceChildren(...)` reemplaza solo la grilla. También se actualizan el contador y los avisos.                                |
+| **Integración en el proyecto**         | La funcionalidad está en el catálogo real del sitio, con su diseño, y la búsqueda funciona desde el buscador de la barra superior.                                                                                                                  |
+
+### Equivalencia con la estructura sugerida
+
+| Consigna                          | SoleMate                                                                                       | Motivo                                                                                                                                                                                       |
+| --------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api/buscar_productos.php`        | `api/productos.php`                                                                            | En el estilo REST de la teoría, la dirección nombra al **recurso** (productos). El mismo endpoint lista con filtros (`?q=…`) y devuelve un producto (`?id=3`), como el ejemplo de la teoría. |
+| `js/app.js`                       | `js/main.js`                                                                                   | El archivo ya existía, estaba vacío y `footer.php` lo carga en todas las páginas. El código solo actúa si encuentra la grilla del catálogo.                                                  |
+| `$conexion`                       | `$pdo`                                                                                         | Es la variable que crea `config/conexion.php` desde el TP N° 7.                                                                                                                              |
+| Búsqueda solo por nombre (`LIKE`) | Búsqueda por nombre, marca y categoría más los filtros de talla, precio, marca, origen y orden | Se reutiliza la consulta del catálogo, así la búsqueda en vivo respeta los filtros marcados.                                                                                                 |
+| Tarjetas con `innerHTML`          | `<template>` y `textContent`                                                                   | Con `innerHTML`, un dato con HTML se ejecutaría (**XSS**); con `textContent` siempre se muestra como texto.                                                                                  |
+
+No hizo falta modificar la base de datos: el endpoint usa las tablas del TP N° 6.
+
+### Archivos del módulo
+
+| Archivo                          | Función                                                                                                                                                                                |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api/productos.php`              | Endpoint JSON: valida el método y los parámetros, consulta la base y responde con el código HTTP adecuado                                                                              |
+| `includes/catalogo_consulta.php` | Lógica compartida por la página y la API: valores permitidos, validación de los filtros GET y consulta preparada (antes estaba dentro de `catalogo.php`)                               |
+| `catalogo.php`                   | Usa la lógica compartida y suma los identificadores (`grilla-productos`, `contador-resultados`, `estado-catalogo` y `avisos-catalogo`) y la `<template>` de la tarjeta para JavaScript |
+| `js/main.js`                     | Eventos, `fetch` con `async/await`, manejo de errores y actualización del DOM                                                                                                          |
+| `config/conexion.php`            | Si lo incluye un endpoint (constante `RESPUESTA_JSON`), el error de conexión también se responde en JSON                                                                               |
+
+### Cómo se usa la API
+
+Solo acepta **GET**, porque únicamente lee datos (la operación _Read_ del CRUD).
+
+| Petición                                                                                 | Código | Respuesta                                                      |
+| ---------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------- |
+| `api/productos.php`                                                                      | 200    | Todos los productos visibles                                   |
+| `api/productos.php?q=nike&talla[]=41&marca[]=1&origen[]=1&precio_max=200000&orden=menor` | 200    | Productos que cumplen los filtros (la lista puede estar vacía) |
+| `api/productos.php?talla[]=99&orden=foo`                                                 | 400    | `"errores"` con un aviso por cada filtro inválido              |
+| `api/productos.php?id=3`                                                                 | 200    | Un solo producto                                               |
+| `api/productos.php?id=abc`                                                               | 400    | "El id debe ser un número entero mayor que 0."                 |
+| `api/productos.php?id=99`                                                                | 404    | "Producto no encontrado."                                      |
+| `POST api/productos.php`                                                                 | 405    | Encabezado `Allow: GET, HEAD`                                  |
+| (base de datos apagada)                                                                  | 500    | Mensaje genérico; el detalle queda en el log del servidor      |
+
+Ejemplo de respuesta exitosa (`api/productos.php?q=nike`):
+
+```json
+{
+  "status": "success",
+  "total": 1,
+  "data": [
+    {
+      "id": 1,
+      "nombre": "Nike Air Max 270",
+      "precio": 199900,
+      "imagen": "img/nike-air-max-270.jpg",
+      "alt": "Zapatilla Nike Air Max 270 blanca con suela roja",
+      "categoria": "Running",
+      "origen": "Chile",
+      "talles": "ARG 38–40"
+    }
+  ]
+}
+```
+
+Ejemplo de error (`api/productos.php?talla[]=99&orden=foo`, código 400):
+
+```json
+{
+  "status": "error",
+  "message": "Hay filtros inválidos en la búsqueda.",
+  "errores": {
+    "talla": "Una de las tallas elegidas no existe.",
+    "orden": "El orden elegido no existe."
+  }
+}
+```
+
+### Flujo asincrónico
+
+1. El usuario escribe en el buscador, marca un filtro o elige un orden.
+2. `js/main.js` toma los datos del formulario de filtros (`new FormData(...)`) y llama a `fetch('api/productos.php?…')` en segundo plano. Mientras tanto la página sigue respondiendo y la grilla se atenúa como aviso de "cargando".
+3. `api/productos.php` valida los parámetros, consulta la base con una consulta preparada y responde con `json_encode()` y el código HTTP.
+4. JavaScript revisa `response.ok`, lee el JSON con `response.json()`, recorre `data` con `.map()` y reemplaza solo las tarjetas, el contador y los avisos.
+5. `history.replaceState()` actualiza la dirección (por ejemplo, `catalogo.php?q=nike`) sin recargar, para que al actualizar o compartir el enlace se vea lo mismo.
+
+### Decisiones de diseño
+
+- **Lógica compartida:** la validación de filtros y la consulta se movieron de `catalogo.php` a `includes/catalogo_consulta.php`, que solo recibe y devuelve datos. La página y la API usan exactamente las mismas reglas, sin código repetido (deja la base del "Modelo" del TP N° 10).
+- **Mejora progresiva:** el formulario GET del TP N° 5 sigue intacto. Con JavaScript, el catálogo se actualiza sin recargar; sin JavaScript, funciona igual que antes, con recarga completa.
+- **API estricta:** la página ignora un filtro inválido y muestra un aviso, pero la API responde **400**, porque le contesta a otro programa y tiene que avisarle con claridad que la petición está mal formada.
+- **Errores también en JSON:** el endpoint define `RESPUESTA_JSON` antes de incluir la conexión. Si la base no responde, `conexion.php` contesta `500` con un JSON en lugar de texto plano, así `response.json()` puede leer el mensaje.
+- **Debounce de 300 ms:** al escribir "nike" sale **una sola** petición, y no una por letra.
+- **`AbortController`:** cada búsqueda nueva cancela la anterior si todavía no terminó, para que una respuesta vieja no pise a una más nueva.
+- **`requestSubmit()` en el selector de orden:** a diferencia de `submit()`, dispara el evento `submit`, que JavaScript intercepta con `preventDefault()`.
+- **Filtros al instante:** las tallas, el precio, las marcas y el origen se aplican al cambiarlos; el botón "Aplicar" sigue funcionando.
+- **Accesibilidad:** el contador tiene `aria-live="polite"` (el lector de pantalla anuncia el nuevo total) y la grilla usa `aria-busy` mientras carga.
+- **Endpoint público:** el catálogo no requiere sesión, por eso `api/productos.php` no usa el guardián del TP N° 8. Un endpoint protegido debería responder `401`/`403` en JSON en lugar de redirigir al login.
+
+### Evidencia de funcionamiento
+
+El endpoint devuelve **solo datos JSON**, sin HTML. El precio es un número:
+
+![JSON del endpoint en el navegador](docs/tp9/tp9-01-api-json-navegador.png)
+
+Códigos de estado HTTP probados con `curl.exe`: **200**, **400**, **404** y **405**:
+
+![Códigos HTTP con curl](docs/tp9/tp9-02-curl-codigos-http.png)
+
+**Búsqueda en vivo:** al escribir "nike" sale una sola petición `fetch` (200) y la grilla se actualiza sin recargar la página:
+
+![Búsqueda en vivo con la pestaña Red](docs/tp9/tp9-03-busqueda-en-vivo.png)
+
+La respuesta JSON vista en las DevTools (pestaña Preview):
+
+![Respuesta JSON en las DevTools](docs/tp9/tp9-04-respuesta-json-devtools.png)
+
+**Filtros sin recarga:** la talla 42 deja dos productos y la dirección se actualiza con `history.replaceState()`:
+
+![Filtros sin recarga](docs/tp9/tp9-05-filtros-sin-recarga.png)
+
+Búsqueda sin coincidencias: respuesta 200 con `data: []` y aviso al usuario:
+
+![Sin resultados](docs/tp9/tp9-06-sin-resultados.png)
+
+**Error 400:** una búsqueda de más de 60 caracteres; la API lo rechaza y JavaScript muestra el detalle:
+
+![Error 400](docs/tp9/tp9-07-error-400.png)
+
+**Falla de red** (modo _Offline_ de las DevTools): `fetch` lanza `TypeError: Failed to fetch`, el `catch` muestra el aviso y las tarjetas anteriores siguen visibles:
+
+![Sin conexión](docs/tp9/tp9-08-sin-conexion.png)
+
+**Error 500** con MySQL apagado: el servidor responde en JSON y el usuario ve un mensaje claro:
+
+![Error 500](docs/tp9/tp9-09-error-500.png)
+
+**Sin JavaScript** el catálogo sigue funcionando con recarga completa (mejora progresiva):
+
+![Sin JavaScript](docs/tp9/tp9-10-sin-javascript.png)
+
 ## Diseño en Figma
 
 ![Diseño de la home en Figma](docs/diseno/Home.png)
@@ -539,7 +691,8 @@ El naranja del diseño original (`#FF4D00`) no alcanza el contraste mínimo de 4
 - HTML5 semántico
 - CSS3 con variables personalizadas
 - [Bootstrap 5.3.3](https://getbootstrap.com/) y [Bootstrap Icons 1.11.3](https://icons.getbootstrap.com/)
-- JavaScript (archivo base `js/main.js`)
+- **JavaScript**: Fetch API con `async/await`, manipulación del DOM y `<template>` (catálogo asincrónico, desde el TP N° 9)
+- **JSON** como formato de intercambio entre el navegador y el servidor (API del TP N° 9)
 - **PHP 8** (includes con `require_once`, variables, constantes y `htmlspecialchars()`)
 - **PDO** con consultas preparadas (conexión a MySQL, desde el TP N° 7)
 - **Sesiones de PHP** (`$_SESSION`) y `password_hash()` / `password_verify()` con bcrypt (autenticación, desde el TP N° 8)
@@ -564,6 +717,7 @@ ecommerce-zapatillas/
 │   ├── nav.php               # barra superior y menú principal
 │   ├── footer.php            # pie de página y scripts
 │   ├── funciones.php         # e(), dato_post(), dato_get() y dato_get_lista()
+│   ├── catalogo_consulta.php # filtros y consulta del catálogo, compartidos con la API (TP N° 9)
 │   ├── sesion.php            # inicio de sesión con cookie segura (TP N° 8)
 │   ├── auth_guard.php        # guardián de rutas y verificarRol() (TP N° 8)
 │   └── prohibido.php         # página 403 Acceso prohibido (TP N° 8)
@@ -574,10 +728,12 @@ ecommerce-zapatillas/
 │   ├── eliminar.php          # Delete: baja por POST
 │   ├── producto_comun.php    # validación compartida
 │   └── formulario_producto.php  # formulario compartido
+├── api/
+│   └── productos.php         # endpoint JSON del catálogo (TP N° 9)
 ├── css/
 │   └── styles.css
 ├── js/
-│   └── main.js
+│   └── main.js               # Fetch API: búsqueda y filtros sin recarga (TP N° 9)
 ├── img/                      # fotografías de productos y hero
 ├── docs/
 │   ├── auditoria-lighthouse.md
@@ -585,14 +741,15 @@ ecommerce-zapatillas/
 │   ├── lighthouse/           # capturas de la auditoría
 │   ├── tp4-*.png             # capturas del TP N° 4
 │   ├── tp7/                  # capturas tp7-*.png del TP N° 7
-│   └── tp8/                  # capturas tp8-*.png del TP N° 8
+│   ├── tp8/                  # capturas tp8-*.png del TP N° 8
+│   └── tp9/                  # capturas tp9-*.png del TP N° 9
 ├── .vscode/settings.json     # formateo con Prettier al guardar
 ├── .env.example              # plantilla de variables de entorno
 ├── .gitignore                # ignora .env y node_modules
 ├── .prettierrc
 ├── .prettierignore
 ├── index.php
-├── catalogo.php
+├── catalogo.php              # catálogo: con JavaScript se actualiza sin recargar (TP N° 9)
 ├── producto.php
 ├── carrito.php
 ├── login.php                 # inicio de sesión (TP N° 8)
@@ -737,6 +894,29 @@ No necesita cambios en la base ni en el `.env`: usa la misma configuración del 
 
 3. Para cerrar sesión, usar el ícono de salida de la barra superior (o abrir `logout.php`).
 
+### Ejecutar el TP N° 9 (AJAX y JSON)
+
+No necesita cambios en la base ni en el `.env`: usa la misma configuración del TP N° 7.
+
+1. Con **Apache** y **MySQL** encendidos en XAMPP, abrir en el navegador:
+
+   ```
+   http://localhost/ecommerce-zapatillas/catalogo.php            (catálogo asincrónico)
+   http://localhost/ecommerce-zapatillas/api/productos.php       (respuesta JSON del endpoint)
+   http://localhost/ecommerce-zapatillas/api/productos.php?id=3  (un solo producto)
+   ```
+
+2. En el catálogo, escribir en el buscador de la barra superior o marcar un filtro: la grilla cambia sin recargar. Con **F12** → pestaña **Network** → filtro **Fetch/XHR** se ven las peticiones a `api/productos.php` y sus respuestas JSON.
+
+3. Para ver los códigos de estado desde la terminal (PowerShell):
+
+   ```powershell
+   curl.exe -i "http://localhost/ecommerce-zapatillas/api/productos.php?id=99"
+   curl.exe -i -X POST "http://localhost/ecommerce-zapatillas/api/productos.php"
+   ```
+
+   La primera responde `404 Not Found` y la segunda `405 Method Not Allowed`.
+
 ## Flujo de trabajo con Git
 
 ### TP N° 3
@@ -788,6 +968,14 @@ El proyecto se desarrolló con un flujo basado en ramas y Pull Request:
 4. Cada archivo se verificó con `php -l` y se probó en el navegador (con cada rol y sin sesión) antes de su commit.
 5. Se subió la rama a GitHub y se abrió un Pull Request hacia `main`, fusionado con **Create a merge commit** (sin squash) y sin borrar la rama.
 
+### TP N° 9
+
+1. Se creó la rama `feature/tp9-ajax-json` a partir de `main` actualizado (con el TP N° 8 ya fusionado).
+2. Se trabajó en la aplicación principal, sobre el catálogo de los TP N° 5 y N° 7.
+3. Se hicieron **commits atómicos**: un `refactor:` para mover la lógica del catálogo a `includes/catalogo_consulta.php` y preparar la vista (sin cambios visibles), uno para que `conexion.php` responda los errores en JSON, uno para el endpoint `api/productos.php`, uno para el JavaScript con Fetch API y otros para las capturas y la documentación.
+4. Cada archivo PHP se verificó con `php -l`; el endpoint se probó con `curl.exe` (códigos 200, 400, 404, 405 y 500) y el catálogo en el navegador con las DevTools (pestaña Network, red lenta, modo _Offline_, MySQL apagado y JavaScript desactivado).
+5. Se subió la rama a GitHub y se abrió un Pull Request hacia `main`, fusionado con **Create a merge commit** (sin squash) y sin borrar la rama.
+
 Los mensajes de commit siguen una convención de prefijos:
 
 | Prefijo     | Uso                                           |
@@ -830,6 +1018,9 @@ Los mensajes de commit siguen una convención de prefijos:
 - Desde el TP N° 8, el registro cifra las contraseñas con `password_hash($password, PASSWORD_BCRYPT)` y el login las compara con `password_verify()`, según las recomendaciones de **OWASP**. El login no revela si un correo está registrado.
 - La sesión usa una cookie `PHPSESSID` con `HttpOnly` (JavaScript no puede leerla), `SameSite=Lax`, `use_only_cookies` (el id nunca viaja en la URL), `use_strict_mode` y `Secure` cuando hay HTTPS. Tras un login correcto se llama a `session_regenerate_id(true)` para evitar la **fijación de sesión**.
 - El **control de acceso** se hace en el servidor, al principio de cada página protegida: ocultar el ícono del panel no alcanza, por eso el guardián redirige a quien no inició sesión y responde **403** al rol que no corresponde, aunque se escriba la URL a mano o se envíe un formulario directo a `admin/eliminar.php`.
+- Desde el TP N° 9, el endpoint `api/productos.php` valida en el servidor cada parámetro (las mismas listas blancas del catálogo) y responde `400` ante datos inválidos; solo acepta GET (`405` para otros métodos). Las consultas siguen siendo preparadas.
+- Las tarjetas que arma JavaScript se completan con `textContent`, nunca con `innerHTML`: un dato con HTML (por ejemplo `<img src=x onerror=alert(1)>`) se muestra como texto y no se ejecuta (prevención de **XSS** en el navegador).
+- Los errores de la API devuelven mensajes genéricos en JSON; el detalle técnico solo se registra con `error_log()`.
 
 ## Auditoría Lighthouse
 
@@ -871,7 +1062,8 @@ Para un proyecto con un diseño muy particular, que no se parezca a ningún fram
 
 - Procesar el formulario del checkout en PHP y guardar los pedidos en la base; el contacto, los filtros del catálogo (TP N° 5), el login y el registro (TP N° 8) ya se procesan en el servidor.
 - Bloquear el acceso web al archivo `.env` (por ejemplo, con `.htaccess`) en un servidor real.
-- Hacer funcional el carrito con JavaScript.
+- Hacer funcional el carrito con JavaScript y un endpoint JSON (por ejemplo, `api/carrito.php` guardando los productos en la sesión), que responda `401` en JSON cuando haga falta iniciar sesión.
+- Paginar los resultados de la API cuando el catálogo tenga muchos productos.
 - Limitar los intentos de inicio de sesión fallidos, agregar la recuperación de contraseña y permitir editar los datos desde "Mi cuenta".
 - Servir el sitio por HTTPS en producción, para que la cookie de sesión viaje siempre marcada como `Secure`.
 - Administrar desde el panel el stock por talle y permitir subir imágenes nuevas.
@@ -883,4 +1075,4 @@ Para un proyecto con un diseño muy particular, que no se parezca a ningún fram
 ## Datos académicos
 
 Tecnicatura Superior en Análisis, Diseño y Desarrollo de Software – IES N° 6001, Salta, Argentina
-Materia: Programación Web – TP N° 3, TP N° 4, TP N° 5, TP N° 6, TP N° 7 y TP N° 8
+Materia: Programación Web – TP N° 3, TP N° 4, TP N° 5, TP N° 6, TP N° 7, TP N° 8 y TP N° 9
