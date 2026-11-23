@@ -1,0 +1,5 @@
+# tp10-laravel/.htaccess
+# TP10: el proyecto Laravel se ejecuta con "php artisan serve"
+# (http://127.0.0.1:8000), no desde Apache. Así nadie puede abrir sus
+# archivos internos (storage/, vendor/, config/) desde http://localhost.
+Require all denied
