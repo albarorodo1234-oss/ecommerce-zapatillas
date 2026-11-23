@@ -1,6 +1,6 @@
 # SoleMate – Ecommerce de zapatillas importadas
 
-Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en siete etapas:
+Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y Bolivia (Nike, Jordan, Adidas y New Balance). Proyecto de la materia **Programación Web**, desarrollado en ocho etapas:
 
 - **TP N° 3:** maquetación front-end en HTML5 semántico, CSS3 y Bootstrap, con Git Workflow, SEO y accesibilidad.
 - **TP N° 4:** _Migración a PHP, Modularización (SSI) y Renderizado Server-Side (SSR)_. Las 10 vistas pasaron de HTML estático a PHP, con plantillas reutilizables, título y menú dinámicos, y variables de entorno.
@@ -9,6 +9,7 @@ Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y
 - **TP N° 7:** _Persistencia y conexión PHP-MySQL segura_. El sitio se conecta a `solemate_db` con PDO: panel de administración con el CRUD de productos (carpeta [`admin/`](admin/)) y catálogo y detalle de producto leídos de la base, con consultas preparadas y protección XSS. Se desarrolló en la aplicación principal.
 - **TP N° 8:** _Manejo de estado, sesiones y autenticación_. Registro, inicio y cierre de sesión con sesiones de PHP y contraseñas cifradas con bcrypt, guardián de rutas y control de acceso por rol: el panel `admin/` solo lo usa el Administrador. Se desarrolló en la aplicación principal.
 - **TP N° 9:** _Comunicación asincrónica y APIs (AJAX & JSON)_. El catálogo busca, filtra y ordena **sin recargar la página**: JavaScript pide los productos con Fetch API (`async/await`) a un endpoint PHP que responde JSON con códigos HTTP (carpeta [`api/`](api/)), y actualiza solo la grilla. Se desarrolló en la aplicación principal.
+- **TP N° 10:** _Patrón MVC e introducción a frameworks_. El módulo de productos (catálogo, detalle y API) se reorganizó en **Modelo, Vista y Controlador** (carpeta [`app/`](app/)), y se creó un módulo de **reporte de stock por marca** con **Laravel 13** (rutas, controlador, modelos Eloquent y vistas Blade) en la carpeta [`tp10-laravel/`](tp10-laravel/), sobre la misma base `solemate_db`.
 
 ## Enlaces
 
@@ -19,7 +20,8 @@ Sitio web de **SoleMate**, una tienda online de zapatillas importadas de Chile y
 - **Desarrollo del TP N° 6:** [carpeta tp6/](tp6/) · [normalización](tp6/NORMALIZACION.md) · [sección del README](#clase-6-diseño-y-creación-del-esquema-relacional-en-mysql-tp-n-6)
 - **Desarrollo del TP N° 7:** [conexión](config/conexion.php) · [panel admin/](admin/) · [sección del README](#clase-7-persistencia-y-conexión-php-mysql-segura-tp-n-7)
 - **Desarrollo del TP N° 8:** [guardián de rutas](includes/auth_guard.php) · [login](login.php) · [registro](registro.php) · [sección del README](#clase-8-manejo-de-estado-sesiones-y-autenticación-tp-n-8)
-- **Desarrollo del TP N° 9:** [endpoint api/productos.php](api/productos.php) · [js/main.js](js/main.js) · [lógica compartida](includes/catalogo_consulta.php) · [sección del README](#clase-9-comunicación-asincrónica-y-apis-con-ajax-y-json-tp-n-9)
+- **Desarrollo del TP N° 9:** [endpoint api/productos.php](api/productos.php) · [js/main.js](js/main.js) · [sección del README](#clase-9-comunicación-asincrónica-y-apis-con-ajax-y-json-tp-n-9)
+- **Desarrollo del TP N° 10:** [modelo](app/Models/Producto.php) · [controladores](app/Controllers/) · [vistas](app/Views/productos/) · [proyecto Laravel](tp10-laravel/) · [rutas](tp10-laravel/routes/web.php) · [sección del README](#clase-10-patrón-mvc-e-introducción-a-frameworks-tp-n-10)
 
 > **Nota sobre la publicación:** en el TP N° 3 el sitio era HTML estático y se publicaba en GitHub Pages. Desde el TP N° 4 las vistas son `.php` y necesitan un servidor con PHP, que GitHub Pages no ofrece. Por eso el sitio se ejecuta en local con XAMPP (ver [Cómo ejecutarlo localmente](#cómo-ejecutarlo-localmente)).
 
@@ -518,6 +520,8 @@ El Administrador entra directo al panel, y solo él ve el acceso al panel en la 
 
 El catálogo pasó del modelo **sincrónico** (cada búsqueda o filtro recargaba la página completa) a una interacción **asincrónica**: JavaScript pide los productos en segundo plano con **Fetch API** a un **endpoint PHP que responde JSON**, y actualiza solo la grilla de tarjetas y el contador, **sin recargar el navegador**. Igual que los TP N° 7 y N° 8, se desarrolló **en la aplicación principal**.
 
+> **Nota (TP N° 10):** la lógica compartida que en este TP se guardó en `includes/catalogo_consulta.php` pasó en el TP N° 10 a la clase Modelo `app/Models/Producto.php`, y `api/productos.php` usa ahora `app/Controllers/ProductoApiController.php`. La API responde exactamente igual (ver la [Clase 10](#clase-10-patrón-mvc-e-introducción-a-frameworks-tp-n-10)).
+
 | Requisito de la consigna               | Cómo se resolvió                                                                                                                                                                                                                                    |
 | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Endpoint PHP independiente**         | `api/productos.php`: no imprime HTML, solo datos. Lee los productos de `solemate_db` con **PDO y consultas preparadas**, usando la misma lógica que `catalogo.php` (`includes/catalogo_consulta.php`).                                              |
@@ -664,6 +668,198 @@ Búsqueda sin coincidencias: respuesta 200 con `data: []` y aviso al usuario:
 
 ![Sin JavaScript](docs/tp9/tp9-10-sin-javascript.png)
 
+## Clase 10: Patrón MVC e introducción a frameworks (TP N° 10)
+
+El trabajo tiene dos partes complementarias. En la **Parte A** se reorganizó el módulo de productos (catálogo, detalle y API) de la aplicación principal con el patrón **Modelo-Vista-Controlador**, en PHP puro. En la **Parte B** se creó un proyecto con el framework **Laravel 13** en la carpeta [`tp10-laravel/`](tp10-laravel/), con un módulo nuevo e independiente: un **reporte de stock por marca** que lee la misma base `solemate_db`.
+
+| Requisito de la consigna                             | Cómo se resolvió                                                                                                                                                                             |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A. Tomar un módulo ya desarrollado**               | El módulo de **productos**: catálogo con filtros (TP N° 5 y N° 7), detalle de producto (TP N° 7) y API JSON (TP N° 9).                                                                       |
+| **A. Carpetas `app/Models`, `Views`, `Controllers`** | `app/Models/Producto.php`, `app/Controllers/ProductoController.php` y `ProductoApiController.php`, y `app/Views/productos/index.php` y `show.php`.                                           |
+| **A. SQL con PDO en clases Modelo**                  | La clase `Producto` concentra **todas** las consultas preparadas del módulo (listado con filtros, detalle, stock por talle y relacionados) y la validación de los filtros.                   |
+| **A. Solicitud en un Controlador**                   | `ProductoController` lee la petición (`$_GET`), le pide los datos al Modelo, maneja los errores y elige la Vista. `ProductoApiController` hace lo mismo para la API y responde JSON.         |
+| **A. HTML limpio en las Vistas**                     | Las vistas solo tienen el HTML y las variables que reciben: no consultan la base ni validan datos.                                                                                           |
+| **B. Proyecto con un framework**                     | **Laravel 13.43** (PHP 8.3), creado con `composer create-project` en `tp10-laravel/`.                                                                                                        |
+| **B. Módulo adicional e independiente**              | Reporte de stock por marca, con una página de resumen, una de detalle por marca y una salida JSON. Solo lectura.                                                                             |
+| **B. Routing**                                       | Tres rutas en `routes/web.php`, con nombre y restricción numérica en el parámetro.                                                                                                           |
+| **B. Controlador del framework**                     | `app/Http/Controllers/ReporteStockController.php` (creado con `php artisan make:controller`).                                                                                                |
+| **B. Modelo con el ORM**                             | Modelos **Eloquent** `Marca`, `Producto` y `ProductoTalle` sobre las tablas existentes, con relaciones `hasMany`, `belongsTo` y `hasManyThrough`, y totales con `withCount()` y `withSum()`. |
+| **B. Vista con el motor de plantillas**              | Vistas **Blade** con una plantilla base (`@extends`, `@section`, `@yield`), bucles (`@forelse`) y salida escapada con `{{ }}`.                                                               |
+| **Control de versiones**                             | Rama `feature/tp10-mvc-framework`, commits atómicos y Pull Request fusionado con el mensaje `feat: refactorizacion MVC e implementacion de modulo con framework`.                            |
+
+### Parte A: refactorización nativa a MVC
+
+#### Flujo de una petición
+
+1. El navegador pide `catalogo.php?marca[]=1`.
+2. `catalogo.php` funciona como **punto de entrada** (cumple el papel de la ruta): conecta con la base y llama a `ProductoController::index()`.
+3. El **Controlador** crea el Modelo `Producto`, le pasa los datos de `$_GET` para validarlos y le pide los productos.
+4. El **Modelo** ejecuta la consulta preparada con PDO y devuelve un arreglo con los resultados, sin HTML.
+5. El Controlador elige la **Vista** `app/Views/productos/index.php` y le pasa las variables.
+6. La Vista arma el HTML (con `header.php` y `footer.php`) y la respuesta vuelve al navegador.
+
+#### Archivos
+
+| Archivo                                     | Capa             | Función                                                                                                                     |
+| ------------------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `app/Models/Producto.php`                   | Modelo           | Clase con la conexión (`$pdo`), los valores permitidos de los filtros (constantes de clase) y todos los métodos de consulta |
+| `app/Controllers/ProductoController.php`    | Controlador      | `index()` (catálogo) y `show()` (detalle); `render()` carga la vista y le pasa los datos                                    |
+| `app/Controllers/ProductoApiController.php` | Controlador      | `index()` y `show()` de la API: mismos códigos HTTP y mismo JSON que en el TP N° 9                                          |
+| `app/Views/productos/index.php`             | Vista            | HTML del catálogo (conserva los ids que usa `js/main.js`)                                                                   |
+| `app/Views/productos/show.php`              | Vista            | HTML del detalle o de "Producto no encontrado"                                                                              |
+| `catalogo.php`, `producto.php`              | Punto de entrada | Tres líneas: conexión, controlador y método                                                                                 |
+| `api/productos.php`                         | Punto de entrada | Encabezado JSON, conexión y elección del método según haya `?id=`                                                           |
+| `app/.htaccess`                             | Seguridad        | `Require all denied`: los archivos de `app/` no se abren directamente desde el navegador                                    |
+
+`includes/catalogo_consulta.php` (TP N° 9) se eliminó: sus constantes y funciones pasaron a ser constantes y métodos de la clase `Producto`. También salieron de `producto.php` las tres consultas que tenía escritas junto al HTML.
+
+#### Equivalencia con la teoría
+
+| Teoría                                       | SoleMate                                                                          | Motivo                                                                                                                                  |
+| -------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `ProductoController@index` y `show`          | `ProductoController::index()` y `show()`                                          | Mismos nombres que el ejemplo de la clase.                                                                                              |
+| `$productoModel->getAll()`                   | `$this->modelo->buscar($filtros)`, `detalle($id)`, `relacionados(...)`            | El catálogo filtra, por eso el método recibe los filtros validados.                                                                     |
+| Front controller `public/index.php` y router | Un punto de entrada por URL (`catalogo.php`, `producto.php`, `api/productos.php`) | Se conservan las direcciones del sitio, los enlaces y el JavaScript del TP N° 9. El router centralizado se aplica en Laravel (Parte B). |
+| `views/productos/index.php`                  | `app/Views/productos/index.php` y `show.php`                                      | Carpeta pedida por la consigna.                                                                                                         |
+
+#### Decisiones de diseño
+
+- **Refactorización sin cambios visibles:** las páginas y la API responden exactamente igual que antes. Se comparó la versión anterior con la nueva en 27 direcciones (filtros válidos e inválidos, detalle, 404, códigos 200/400/404/405 de la API y base caída).
+- **El Modelo no lee `$_GET`:** `validarFiltros()` recibe los datos como parámetro (`$entrada`). Leer la petición es tarea del Controlador; así el Modelo se puede usar desde cualquier lugar.
+- **La Vista no calcula:** el texto de los talles ("ARG 38–40") lo agrega el Controlador a cada producto (`texto_talles`), y la Vista solo lo imprime con `e()`.
+- **Un Modelo, dos Controladores:** la página y la API usan la misma clase `Producto`, sin repetir consultas. En la API, la "vista" es la respuesta JSON.
+- **Constantes de clase:** `Producto::TALLAS`, `Producto::PRECIO_MAXIMO`, etc. reemplazan a las constantes sueltas `CATALOGO_...`; la lista blanca del orden (`ORDENES`) es `private`, porque solo la usa el Modelo.
+- **`render()` con `extract()`:** convierte el arreglo que arma el Controlador en variables (`['producto' => ...]` pasa a ser `$producto`), con los mismos nombres que ya usaba el HTML.
+
+### Parte B: módulo con Laravel
+
+#### Por qué Laravel
+
+| Criterio                    | Laravel 13                                               | CodeIgniter 4                         |
+| --------------------------- | -------------------------------------------------------- | ------------------------------------- |
+| ORM                         | **Eloquent**, con relaciones y agregados                 | Modelo básico, más SQL manual         |
+| Plantillas                  | **Blade** (herencia, directivas y escape automático)     | PHP puro                              |
+| Generación de archivos      | `php artisan make:model`, `make:controller`, `make:view` | `spark`, con menos generadores        |
+| Requisitos en XAMPP         | PHP 8.3 (el instalado) y Composer                        | Necesita la extensión `intl` activada |
+| Popularidad y documentación | La más extendida en PHP (lo señala la teoría)            | Menor y decreciente                   |
+
+La consigna nombra justamente a Eloquent y Blade como ejemplos.
+
+#### Estructura según las convenciones de Laravel
+
+| Consigna / teoría                   | Laravel (`tp10-laravel/`)                                                   |
+| ----------------------------------- | --------------------------------------------------------------------------- |
+| `app/Models/`                       | `app/Models/Marca.php`, `Producto.php`, `ProductoTalle.php`                 |
+| `app/Controllers/`                  | `app/Http/Controllers/ReporteStockController.php`                           |
+| `app/Views/`                        | `resources/views/layouts/app.blade.php` y `resources/views/reportes/stock/` |
+| Sistema de rutas                    | `routes/web.php`                                                            |
+| Front controller `public/index.php` | `public/index.php`: todas las peticiones entran por ahí                     |
+
+#### Rutas del módulo
+
+| Método | URI                       | Controlador                    | Nombre                 | Respuesta                                                      |
+| ------ | ------------------------- | ------------------------------ | ---------------------- | -------------------------------------------------------------- |
+| GET    | `/reportes/stock`         | `ReporteStockController@index` | `reportes.stock.index` | Tabla Blade: cada marca con sus productos activos y unidades   |
+| GET    | `/reportes/stock/{marca}` | `ReporteStockController@show`  | `reportes.stock.show`  | Productos de la marca con el stock por talle; 404 si no existe |
+| GET    | `/api/reportes/stock`     | `ReporteStockController@api`   | `api.reportes.stock`   | El mismo resumen en JSON                                       |
+
+- `{marca}` usa **route model binding**: Laravel busca la `Marca` con ese id y se la entrega al controlador; si no existe, responde 404 sin código extra.
+- `whereNumber('marca')` hace que `/reportes/stock/abc` también responda 404.
+- La ruta JSON está en `web.php` porque el archivo `routes/api.php` requiere `php artisan install:api`, que agrega una migración a la base.
+
+#### Modelos Eloquent
+
+| Modelo          | Tabla            | Relaciones                                                                       |
+| --------------- | ---------------- | -------------------------------------------------------------------------------- |
+| `Marca`         | `marcas`         | `productos()` (`hasMany`) y `talles()` (`hasManyThrough`, a través de productos) |
+| `Producto`      | `productos`      | `marca()` (`belongsTo`) y `talles()` (`hasMany`)                                 |
+| `ProductoTalle` | `producto_talle` | `producto()` (`belongsTo`)                                                       |
+
+`Marca::resumenDeStock()` arma el reporte en una sola consulta con `withCount()` (productos activos) y `withSum()` (suma del stock). Como las claves foráneas de la base ya siguen el formato `nombre_tabla_id` (`marca_id`, `producto_id`), Eloquent las reconoce solo; únicamente hubo que indicar el nombre de la tabla `producto_talle` (Laravel esperaba `producto_talles`) y desactivar `timestamps` en las tablas sin `created_at`/`updated_at`.
+
+Ejemplo de respuesta (`/api/reportes/stock`):
+
+```json
+{
+  "status": "success",
+  "total": 4,
+  "data": [
+    { "id": 2, "marca": "Adidas", "productos": 1, "unidades": 8 },
+    { "id": 3, "marca": "Jordan", "productos": 1, "unidades": 5 },
+    { "id": 4, "marca": "New Balance", "productos": 1, "unidades": 5 },
+    { "id": 1, "marca": "Nike", "productos": 1, "unidades": 12 }
+  ]
+}
+```
+
+#### Uso de `solemate_db` sin modificarla
+
+- El `.env` de Laravel apunta a la base del TP N° 6 (`DB_CONNECTION=mysql`, `DB_DATABASE=solemate_db`).
+- **No se ejecuta `php artisan migrate`**: Laravel no crea ninguna tabla en `solemate_db` (se comprobó con `SHOW TABLES`: siguen las 11 tablas originales).
+- Las sesiones y la caché se guardan en archivos (`SESSION_DRIVER=file`, `CACHE_STORE=file`) y las tareas se ejecutan al momento (`QUEUE_CONNECTION=sync`), así no hacen falta las tablas propias de Laravel.
+- El módulo solo lee datos.
+
+#### Decisiones de diseño
+
+- **Carpeta propia:** el proyecto Laravel está en `tp10-laravel/`, separado de la aplicación principal, como pide la consigna.
+- **Se ejecuta con `php artisan serve`** (`http://127.0.0.1:8000`). `tp10-laravel/.htaccess` (`Require all denied`) impide que Apache muestre sus archivos internos desde `http://localhost`.
+- **Fuera del repositorio:** `vendor/` (se regenera con `composer install`), el `.env` con las credenciales y la base SQLite de prueba que crea el instalador, gracias al `.gitignore` del propio Laravel. `.env.example` tiene las claves sin valores reales.
+- **Mismo estilo visual:** las vistas usan Bootstrap 5.3.3 y el color de botones de SoleMate (`#D43F00`).
+
+### Evidencia de funcionamiento
+
+**Parte A.** Estructura MVC de la aplicación principal: `app/Models`, `app/Controllers` y `app/Views`; `catalogo.php` quedó como punto de entrada de pocas líneas:
+
+![Estructura MVC en VS Code](docs/tp10/tp10-01-estructura-mvc.png)
+
+El catálogo funciona igual que antes, ahora a través de `ProductoController::index()` (filtro por marca aplicado):
+
+![Catálogo con MVC](docs/tp10/tp10-02-catalogo-mvc.png)
+
+Detalle de producto servido por `ProductoController::show()`:
+
+![Detalle de producto con MVC](docs/tp10/tp10-03-detalle-mvc.png)
+
+Pruebas con `curl.exe`: páginas y API responden los mismos códigos que en el TP N° 9 (200, 404, 400 y 405), y `.env` y `app/` responden **403**:
+
+![Pruebas con curl de la Parte A](docs/tp10/tp10-04-pruebas-curl-parte-a.png)
+
+**Parte B.** Estructura del proyecto Laravel con el módulo y sus rutas en `routes/web.php`:
+
+![Estructura del proyecto Laravel](docs/tp10/tp10-05-estructura-laravel.png)
+
+Versión de Laravel y las tres rutas del módulo (`php artisan route:list --path=reportes`):
+
+![Rutas con artisan](docs/tp10/tp10-06-artisan-rutas.png)
+
+Modelo Eloquent `Marca` con sus relaciones y el controlador `ReporteStockController`:
+
+![Modelo Eloquent y controlador](docs/tp10/tp10-07-eloquent-y-controlador.png)
+
+Vista Blade del reporte (`@extends`, `@forelse` y salida escapada con `{{ }}`):
+
+![Vista Blade](docs/tp10/tp10-08-vista-blade.png)
+
+Reporte de stock por marca en `/reportes/stock`:
+
+![Reporte de stock](docs/tp10/tp10-09-reporte-stock.png)
+
+Detalle de una marca con el stock por talle (`/reportes/stock/1`):
+
+![Detalle de la marca](docs/tp10/tp10-10-detalle-marca.png)
+
+Salida JSON del módulo (`/api/reportes/stock`):
+
+![JSON del reporte](docs/tp10/tp10-11-api-json.png)
+
+Una marca inexistente responde **404** gracias al route model binding:
+
+![Error 404 en Laravel](docs/tp10/tp10-12-error-404.png)
+
+Commits del TP N° 10 en la rama `feature/tp10-mvc-framework`:
+
+![Commits del TP10](docs/tp10/tp10-13-git-log.png)
+
 ## Diseño en Figma
 
 ![Diseño de la home en Figma](docs/diseno/Home.png)
@@ -693,9 +889,10 @@ El naranja del diseño original (`#FF4D00`) no alcanza el contraste mínimo de 4
 - [Bootstrap 5.3.3](https://getbootstrap.com/) y [Bootstrap Icons 1.11.3](https://icons.getbootstrap.com/)
 - **JavaScript**: Fetch API con `async/await`, manipulación del DOM y `<template>` (catálogo asincrónico, desde el TP N° 9)
 - **JSON** como formato de intercambio entre el navegador y el servidor (API del TP N° 9)
-- **PHP 8** (includes con `require_once`, variables, constantes y `htmlspecialchars()`)
+- **PHP 8** (includes con `require_once`, variables, constantes y `htmlspecialchars()`; clases y objetos para el patrón **MVC** desde el TP N° 10)
 - **PDO** con consultas preparadas (conexión a MySQL, desde el TP N° 7)
 - **Sesiones de PHP** (`$_SESSION`) y `password_hash()` / `password_verify()` con bcrypt (autenticación, desde el TP N° 8)
+- **Laravel 13** con **Eloquent** (ORM), **Blade** (plantillas) y **Artisan** (línea de comandos), y **Composer** como gestor de dependencias (TP N° 10)
 - **XAMPP** (servidor Apache con PHP para desarrollo local)
 - **MySQL / MariaDB 10.11** y **phpMyAdmin** (base de datos relacional, desde el TP N° 6)
 - Variables de entorno con archivo `.env`
@@ -709,6 +906,17 @@ El naranja del diseño original (`#FF4D00`) no alcanza el contraste mínimo de 4
 
 ```
 ecommerce-zapatillas/
+├── app/                      # patrón MVC del módulo de productos (TP N° 10)
+│   ├── Models/
+│   │   └── Producto.php      # Modelo: consultas PDO y validación de filtros
+│   ├── Controllers/
+│   │   ├── ProductoController.php     # catálogo (index) y detalle (show)
+│   │   └── ProductoApiController.php  # API JSON (index y show)
+│   ├── Views/
+│   │   └── productos/
+│   │       ├── index.php     # Vista del catálogo
+│   │       └── show.php      # Vista del detalle
+│   └── .htaccess             # bloquea el acceso directo desde el navegador
 ├── config/
 │   ├── env.php               # lee el archivo .env y define las constantes
 │   └── conexion.php          # conexión PDO con try-catch (TP N° 7)
@@ -717,7 +925,6 @@ ecommerce-zapatillas/
 │   ├── nav.php               # barra superior y menú principal
 │   ├── footer.php            # pie de página y scripts
 │   ├── funciones.php         # e(), dato_post(), dato_get() y dato_get_lista()
-│   ├── catalogo_consulta.php # filtros y consulta del catálogo, compartidos con la API (TP N° 9)
 │   ├── sesion.php            # inicio de sesión con cookie segura (TP N° 8)
 │   ├── auth_guard.php        # guardián de rutas y verificarRol() (TP N° 8)
 │   └── prohibido.php         # página 403 Acceso prohibido (TP N° 8)
@@ -729,7 +936,7 @@ ecommerce-zapatillas/
 │   ├── producto_comun.php    # validación compartida
 │   └── formulario_producto.php  # formulario compartido
 ├── api/
-│   └── productos.php         # endpoint JSON del catálogo (TP N° 9)
+│   └── productos.php         # endpoint JSON del catálogo (TP N° 9); punto de entrada MVC (TP N° 10)
 ├── css/
 │   └── styles.css
 ├── js/
@@ -742,15 +949,17 @@ ecommerce-zapatillas/
 │   ├── tp4-*.png             # capturas del TP N° 4
 │   ├── tp7/                  # capturas tp7-*.png del TP N° 7
 │   ├── tp8/                  # capturas tp8-*.png del TP N° 8
-│   └── tp9/                  # capturas tp9-*.png del TP N° 9
+│   ├── tp9/                  # capturas tp9-*.png del TP N° 9
+│   └── tp10/                 # capturas tp10-*.png del TP N° 10
 ├── .vscode/settings.json     # formateo con Prettier al guardar
 ├── .env.example              # plantilla de variables de entorno
+├── .htaccess                 # impide descargar los archivos .env desde el navegador (TP N° 10)
 ├── .gitignore                # ignora .env y node_modules
 ├── .prettierrc
 ├── .prettierignore
 ├── index.php
-├── catalogo.php              # catálogo: con JavaScript se actualiza sin recargar (TP N° 9)
-├── producto.php
+├── catalogo.php              # punto de entrada → ProductoController::index() (TP N° 10)
+├── producto.php              # punto de entrada → ProductoController::show() (TP N° 10)
 ├── carrito.php
 ├── login.php                 # inicio de sesión (TP N° 8)
 ├── registro.php              # registro de clientes (TP N° 8)
@@ -774,6 +983,18 @@ ecommerce-zapatillas/
 │   ├── schema.sql                # Parte 2: script DDL (base, tablas, FK e índices)
 │   ├── consultas.sql             # Parte 3: consultas CRUD de prueba
 │   └── docs/                     # capturas tp6-*.png
+├── tp10-laravel/                 # Parte B del TP N° 10: proyecto Laravel 13
+│   ├── app/
+│   │   ├── Http/Controllers/ReporteStockController.php  # controlador del módulo
+│   │   └── Models/               # Marca, Producto y ProductoTalle (Eloquent)
+│   ├── resources/views/
+│   │   ├── layouts/app.blade.php # plantilla base Blade
+│   │   └── reportes/stock/       # index.blade.php y show.blade.php
+│   ├── routes/web.php            # rutas del módulo
+│   ├── public/index.php          # front controller de Laravel
+│   ├── .env.example              # configuración sin valores reales (el .env no se sube)
+│   ├── .htaccess                 # Apache no sirve esta carpeta (se usa php artisan serve)
+│   └── (demás archivos generados por Laravel; vendor/ no se sube)
 └── README.md
 ```
 
@@ -917,6 +1138,50 @@ No necesita cambios en la base ni en el `.env`: usa la misma configuración del 
 
    La primera responde `404 Not Found` y la segunda `405 Method Not Allowed`.
 
+### Ejecutar el TP N° 10 (MVC y Laravel)
+
+**Parte A.** No necesita cambios en la base ni en el `.env`. Con **Apache** y **MySQL** encendidos, se usa igual que antes:
+
+```
+http://localhost/ecommerce-zapatillas/catalogo.php       (ProductoController::index)
+http://localhost/ecommerce-zapatillas/producto.php?id=1  (ProductoController::show)
+http://localhost/ecommerce-zapatillas/api/productos.php  (ProductoApiController)
+```
+
+**Parte B.** Requiere PHP 8.3 o superior, [Composer](https://getcomposer.org/) y la base `solemate_db` del TP N° 6, con **MySQL** encendido. En PowerShell, desde la carpeta del proyecto:
+
+1. Instalar las dependencias (crea la carpeta `vendor/`, que no está en el repositorio):
+
+   ```powershell
+   cd tp10-laravel
+   composer install
+   ```
+
+2. Crear el `.env` y su clave de cifrado:
+
+   ```powershell
+   copy .env.example .env
+   php artisan key:generate
+   ```
+
+3. Completar en `tp10-laravel/.env` el usuario y la contraseña de MySQL (`DB_USERNAME` y `DB_PASSWORD`; con XAMPP, `root` y vacía).
+
+4. Levantar el servidor de desarrollo de Laravel:
+
+   ```powershell
+   php artisan serve
+   ```
+
+5. Abrir en el navegador:
+
+   ```
+   http://127.0.0.1:8000/reportes/stock        (reporte por marca)
+   http://127.0.0.1:8000/reportes/stock/1      (detalle de una marca)
+   http://127.0.0.1:8000/api/reportes/stock    (JSON)
+   ```
+
+> **Importante:** no ejecutar `php artisan migrate`. El módulo usa las tablas del TP N° 6 tal como están y no necesita tablas propias de Laravel.
+
 ## Flujo de trabajo con Git
 
 ### TP N° 3
@@ -976,6 +1241,14 @@ El proyecto se desarrolló con un flujo basado en ramas y Pull Request:
 4. Cada archivo PHP se verificó con `php -l`; el endpoint se probó con `curl.exe` (códigos 200, 400, 404, 405 y 500) y el catálogo en el navegador con las DevTools (pestaña Network, red lenta, modo _Offline_, MySQL apagado y JavaScript desactivado).
 5. Se subió la rama a GitHub y se abrió un Pull Request hacia `main`, fusionado con **Create a merge commit** (sin squash) y sin borrar la rama.
 
+### TP N° 10
+
+1. Se creó la rama `feature/tp10-mvc-framework` a partir de `main` actualizado (con el TP N° 9 ya fusionado).
+2. La Parte A se hizo en la aplicación principal y la Parte B en la carpeta `tp10-laravel/`.
+3. Se hicieron **commits atómicos**: un `fix:` para bloquear el acceso web al `.env`; tres `refactor:` (el Modelo, el controlador con las vistas y la API usando el Modelo) y un `style:`; dos `chore:` para crear el proyecto Laravel y configurarlo con `solemate_db`; tres `feat:` para los modelos Eloquent, las vistas Blade y el controlador con las rutas, y otros para las capturas y la documentación.
+4. Los archivos PHP se verificaron con `php -l`; la Parte A se probó con `curl.exe` y en el navegador (mismas respuestas que antes de la refactorización), y la Parte B con `php artisan route:list`, `php artisan view:cache`, `curl.exe` y el navegador.
+5. Se subió la rama a GitHub y se abrió un Pull Request hacia `main` con el título que pide la consigna, **`feat: refactorizacion MVC e implementacion de modulo con framework`**, fusionado con **Create a merge commit** (sin squash), usando ese mismo texto como mensaje del merge commit, y sin borrar la rama.
+
 Los mensajes de commit siguen una convención de prefijos:
 
 | Prefijo     | Uso                                           |
@@ -1021,6 +1294,8 @@ Los mensajes de commit siguen una convención de prefijos:
 - Desde el TP N° 9, el endpoint `api/productos.php` valida en el servidor cada parámetro (las mismas listas blancas del catálogo) y responde `400` ante datos inválidos; solo acepta GET (`405` para otros métodos). Las consultas siguen siendo preparadas.
 - Las tarjetas que arma JavaScript se completan con `textContent`, nunca con `innerHTML`: un dato con HTML (por ejemplo `<img src=x onerror=alert(1)>`) se muestra como texto y no se ejecuta (prevención de **XSS** en el navegador).
 - Los errores de la API devuelven mensajes genéricos en JSON; el detalle técnico solo se registra con `error_log()`.
+- Desde el TP N° 10, un `.htaccess` en la raíz impide que Apache entregue los archivos `.env` (antes se podían descargar escribiendo su dirección), y otro en `app/` bloquea el acceso directo a los Modelos, Controladores y Vistas: responden **403**.
+- En Laravel, Eloquent usa consultas preparadas, Blade escapa todo lo que se imprime con `{{ }}` (prevención de **XSS**) y el framework agrega por defecto la protección contra **CSRF** (cookie `XSRF-TOKEN`). El `.env` de Laravel y la carpeta `vendor/` no se suben al repositorio, y el módulo de reportes solo lee la base.
 
 ## Auditoría Lighthouse
 
@@ -1061,7 +1336,8 @@ Para un proyecto con un diseño muy particular, que no se parezca a ningún fram
 ## Mejoras futuras
 
 - Procesar el formulario del checkout en PHP y guardar los pedidos en la base; el contacto, los filtros del catálogo (TP N° 5), el login y el registro (TP N° 8) ya se procesan en el servidor.
-- Bloquear el acceso web al archivo `.env` (por ejemplo, con `.htaccess`) en un servidor real.
+- Proteger el reporte de stock de Laravel para que solo lo vea el Administrador (con la autenticación del framework).
+- Llevar el resto de las páginas al patrón MVC, con un único punto de entrada (front controller) y un enrutador.
 - Hacer funcional el carrito con JavaScript y un endpoint JSON (por ejemplo, `api/carrito.php` guardando los productos en la sesión), que responda `401` en JSON cuando haga falta iniciar sesión.
 - Paginar los resultados de la API cuando el catálogo tenga muchos productos.
 - Limitar los intentos de inicio de sesión fallidos, agregar la recuperación de contraseña y permitir editar los datos desde "Mi cuenta".
@@ -1075,4 +1351,4 @@ Para un proyecto con un diseño muy particular, que no se parezca a ningún fram
 ## Datos académicos
 
 Tecnicatura Superior en Análisis, Diseño y Desarrollo de Software – IES N° 6001, Salta, Argentina
-Materia: Programación Web – TP N° 3, TP N° 4, TP N° 5, TP N° 6, TP N° 7, TP N° 8 y TP N° 9
+Materia: Programación Web – TP N° 3, TP N° 4, TP N° 5, TP N° 6, TP N° 7, TP N° 8, TP N° 9 y TP N° 10
