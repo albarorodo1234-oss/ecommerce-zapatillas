@@ -1,0 +1,11 @@
+# .htaccess (raíz del proyecto)
+
+# TP10: impide que Apache entregue los archivos .env (credenciales de la
+
+# base) a quien los pida desde el navegador. Vale también para las
+
+# subcarpetas (clase5/ y, en la Parte B, tp10-laravel/).
+
+<Files ".env">
+Require all denied
+</Files>
